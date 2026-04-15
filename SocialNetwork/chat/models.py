@@ -24,7 +24,7 @@ class Message(models.Model):
         (2, 'delivered'),
         (3, 'read'),
     ]
-    status = models.IntegerField(choices=message_statuses, default=1, max_length=10)
+    status = models.IntegerField(choices=message_statuses, default=1)
 
 class StickerMessage(models.Model):
     chat = models.ForeignKey('Chat', on_delete=models.CASCADE)

@@ -1,10 +1,18 @@
 from django.db import models
+from django.utils.text import slugify
 # Create your models here.
 class Post(models.Model):
+    title = models.CharField(max_length=100)
     profile = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField('Tag', related_name='tags', null=True, blank=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
 
 class Media(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
