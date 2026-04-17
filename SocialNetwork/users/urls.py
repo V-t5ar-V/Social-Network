@@ -1,13 +1,19 @@
-from .views import UserRegister, ProfileViewSet
+from .views import UserRegisterAPIView, ProfileViewSet, CheckTagAPIView
 
 from django.urls import path
 
 
 
 urlpatterns = [
-    path('register/', UserRegister.as_view(), name='register'),
+    path('register/', UserRegisterAPIView.as_view(), name='register'),
+    path('check-tag/', CheckTagAPIView.as_view(), name='check_tag'),
     path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
-    # path('profiles/<slug:slug>/',noview(),name='profile'),
+    path('profiles/<slug:slug>/',ProfileViewSet.as_view({
+        'get': 'retrieve',
+        # 'put': 'update',
+        # 'patch': 'partial_update',
+        # 'delete': 'destroy'
+    }) ,name='profile'),
     # path('profiles?<slug:slug>/qr_code', noview(),name='QR_code'),
     # path('profiles/<slug:slug>/blacklist', noview(), name='blocked_users'),
     # path('profiles/<slug:slug>/blacklist/<slug:slug>', noview(), name='remove_blacklisted_user'),

@@ -2,24 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d05896e-5039-42d9-a1d6-18d2530faacd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/SocialNetwork/users/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_functions/test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SocialNetwork/chat/migrations/__init_.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SocialNetwork/feed/migrations/__init_.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SocialNetwork/users/migrations/__init_.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/SocialNetwork/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/SocialNetwork/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/SocialNetwork/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/SocialNetwork/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/chat/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/chat/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/chat/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,24 +40,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.test.executor": "Run",
-    "Python.views.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "main",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.views.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.31033.139" />
         <option value="bundled-python-sdk-2653e85de345-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.31033.139" />
       </set>
     </attachedChunks>
@@ -90,7 +81,8 @@
       <workItem from="1776156934094" duration="2416000" />
       <workItem from="1776159963829" duration="387000" />
       <workItem from="1776160961690" duration="3858000" />
-      <workItem from="1776247584625" duration="6604000" />
+      <workItem from="1776247584625" duration="6785000" />
+      <workItem from="1776330714168" duration="88000" />
     </task>
     <servers />
   </component>
