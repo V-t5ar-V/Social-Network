@@ -10,7 +10,7 @@ urlpatterns = [
     path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
     path('profiles/<slug:slug>/',ProfileViewSet.as_view({
         'get': 'retrieve',
-        # 'put': 'update',
+        'put': 'update',
         # 'patch': 'partial_update',
         # 'delete': 'destroy'
     }) ,name='profile'),

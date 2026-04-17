@@ -26,11 +26,26 @@ class ProfileViewSet(viewsets.ViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, slug=None):
+    def retrieve(self, request, slug=None):
         queryset = Profile.objects.all()
         profile = get_object_or_404(queryset, slug=slug)
-        serializer = self.serializer_class(profile)
+        serializer = self.serializer_class(profile, context={'request': request})
         return Response(serializer.data)
+
+    def update(self, request, slug=None):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, slug=slug)
+        serializer = self.serializer_class(
+            profile,
+            data=request.data,
+            context={'request': request},
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+ 
 
 
 

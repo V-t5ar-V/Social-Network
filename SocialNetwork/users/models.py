@@ -15,9 +15,9 @@ class Profile(models.Model):
     slug = models.SlugField(max_length=100, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.user_tag)
         if not self.user_tag:
-            self.user_tag = slugify(self.user.username + self.user.id)
+            self.user_tag = slugify(f'{self.user.username}-{self.user_id}')
+        self.slug = slugify(self.user_tag)
         super().save(*args, **kwargs)
 
     def __str__(self):
