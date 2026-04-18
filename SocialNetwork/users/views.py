@@ -1,8 +1,7 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
 from .serializers import UserRegistrationSerializer, ProfileSerializer
 from rest_framework.response import Response
-from rest_framework import status
 from .models import Profile
 from rest_framework.generics import get_object_or_404
 
@@ -26,11 +25,30 @@ class ProfileViewSet(viewsets.ViewSet):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, slug=None):
+    def retrieve(self, request, slug=None):
         queryset = Profile.objects.all()
         profile = get_object_or_404(queryset, slug=slug)
-        serializer = self.serializer_class(profile)
+        serializer = self.serializer_class(profile, context={'request': request})
         return Response(serializer.data)
+
+    def partial_update(self, request, slug=None):
+        queryset = Profile.objects.all()
+        profile = get_object_or_404(queryset, slug=slug)
+        if profile.user != request.user:
+            return Response({'title': 'Нельзя редактировать чужой профиль'})
+        serializer = self.serializer_class(
+            profile,
+            data=request.data,
+            context={'request': request},
+
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+ 
 
 
 

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=100)
-    profile = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField('Tag', related_name='tags', blank=True)
@@ -24,17 +24,17 @@ class Tag(models.Model):
 
 class Comment(models.Model):
     text = models.CharField(max_length=200)
-    profile = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
 
 class Like(models.Model):
-    profile = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
-        unique_together = ('profile', 'post')
+        unique_together = ('user', 'post')
 
 class PostView(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE)

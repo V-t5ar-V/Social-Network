@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Chat(models.Model):
@@ -8,7 +9,7 @@ class Chat(models.Model):
 
 class ChatMember(models.Model):
     chat = models.ForeignKey('Chat', on_delete=models.CASCADE)
-    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(auto_now_add=True)
     is_admin = models.BooleanField(default=False)
     class Meta:
@@ -16,7 +17,7 @@ class ChatMember(models.Model):
 
 class Message(models.Model):
     chat = models.ForeignKey('Chat', on_delete=models.CASCADE)
-    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     message_statuses = [
@@ -29,7 +30,7 @@ class Message(models.Model):
 class StickerMessage(models.Model):
     chat = models.ForeignKey('Chat', on_delete=models.CASCADE)
     sticker = models.ForeignKey('Sticker', on_delete=models.CASCADE)
-    user = models.ForeignKey('users.Profile', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     sent_at = models.DateTimeField(auto_now_add=True)
 
 class Sticker(models.Model):
