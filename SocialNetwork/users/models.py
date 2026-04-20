@@ -12,7 +12,7 @@ class Profile(models.Model):
     is_online = models.BooleanField(default=False)
     slug = models.SlugField(max_length=30, primary_key=True, editable=True)
     def __str__(self):
-        return f'{self.user_tag}, name={self.user.username}'
+        return f'{self.slug}, name={self.user.username}'
 
 class Subscription(models.Model):
     following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
