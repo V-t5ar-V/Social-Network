@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 # Create your models here.
 
 class Profile(models.Model):
@@ -10,7 +11,12 @@ class Profile(models.Model):
     bio = models.TextField(null=True, blank=True)
     profile_pic = models.ImageField(upload_to='profile_pics', null=True, blank=True)
     is_online = models.BooleanField(default=False)
-    slug = models.SlugField(max_length=30, primary_key=True, editable=True)
+    slug = models.SlugField(max_length=30, unique=True, editable=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.slug)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.slug}, name={self.user.username}'
 

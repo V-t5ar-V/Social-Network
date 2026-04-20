@@ -4,6 +4,7 @@ from .serializers import UserRegistrationSerializer, ProfileSerializer, Subscrip
 from rest_framework.response import Response
 from .models import Profile, Subscription
 from rest_framework.generics import get_object_or_404
+from django.utils.text import slugify
 
 
 # Create your views here.
@@ -144,8 +145,14 @@ class CheckTagAPIView(APIView):
 
     def post(self, request):
         data = request.data
-        tag_exists = self.class_model.objects.filter(user_tag=data['tag']).exists()
-        if tag_exists:
+        tag = data.get('tag') or data.get('slug')
+        if not tag:
+            return Response({'title': 'РџРµСЂРµРґР°Р№С‚Рµ tag РёР»Рё slug.'}, status=status.HTTP_400_BAD_REQUEST)
+        slug = slugify(tag)
+        if not slug:
+            return Response({'title': 'РќР° РўР•Р“ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р±СѓРєРІС‹ РёР»Рё С†РёС„СЂС‹.'}, status=status.HTTP_400_BAD_REQUEST)
+        slug_exists = self.class_model.objects.filter(slug=slug).exists()
+        if slug_exists:
             return Response({'is_free': False}, status=status.HTTP_200_OK)
         return Response({'is_free': True}, status=status.HTTP_200_OK)
 
