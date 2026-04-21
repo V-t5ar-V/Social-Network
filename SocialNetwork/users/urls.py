@@ -10,24 +10,33 @@ urlpatterns = [
     path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
         'get': 'retrieve',
-        'patch': 'partial_update',
-        # 'patch': 'partial_update',
-        # 'delete': 'destroy'
+        'delete': 'destroy'
     }) ,name='profile'),
+    path('profiles/detail/<slug:slug>/following/', SubscriptionViewSet.as_view({
+        'get': 'following',
+    }), name='following'),
+    path('profiles/detail/<slug:slug>/followers/', SubscriptionViewSet.as_view({
+        'get': 'follower',
+    }), name='followers'),
     path('subscriptions/', SubscriptionViewSet.as_view({
         'post': 'create',
-    }), name='subscriptions'),
-    path('subscriptions/<slug:slug>/', SubscriptionViewSet.as_view({
-        'get':'list',
-        'patch':'partial_update',
+    }), name='create_subscription'),
+    path('subscriptions/<int:pk>/accept/', SubscriptionViewSet.as_view({
+        'patch': 'accept'
+    }), name='accept_subscription'),
+    path('subscriptions/<int:pk>/reject/', SubscriptionViewSet.as_view({
+        'patch': 'reject'
+    }), name='reject_subscription'),
+    path('subscriptions/<int:pk>/', SubscriptionViewSet.as_view({
         'delete': 'destroy'
-    }), name='subscriptions_edit'),
+    }), name='delete_subscription'),
+
+
+
+
+
     # path('profiles/<slug:slug>/qr_code', noview(),name='QR_code'),
     # path('profiles/<slug:slug>/blacklist', noview(), name='blocked_users'),
     # path('profiles/<slug:slug>/blacklist/<slug:slug>', noview(), name='remove_blacklisted_user'),
-    # path('profiles/<slug:slug>/subscription_requests', noview(), name='subscription_requests_list'),
-    # path('profiles/<slug:slug>/subscription_requests/<int:pk>', noview(), name='subscription_requests_list'),
-    # path('profiles/<slug:slug>/subscribers/', noview(), name='subscribers_list'),
-    # path('profiles/<slug:slug>/subscribers/<int:pk>', noview(), name='subscribers_list'),
     # path('profiles/<slug:slug>/posts/', noview(), name='posts_list'),
 ]

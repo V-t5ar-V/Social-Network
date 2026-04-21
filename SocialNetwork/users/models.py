@@ -5,6 +5,7 @@ from django.utils.text import slugify
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    name = models.CharField(max_length=30, default='NoName')
     is_private = models.BooleanField(default=False)
     blocked_users = models.ManyToManyField(User, blank=True, related_query_name='blocked_user')
     created_at = models.DateTimeField(auto_now_add=True)
