@@ -44,7 +44,7 @@ class SubscriptionSerializer(serializers.Serializer):
             instance.is_accepted = False
             instance.delete()
             return instance
-        return serializers.ValidationError('можно только принимать либо отклонять запрос')
+        return serializers.ValidationError('можно только принимать или отклонить запрос')
 
 
 
@@ -69,7 +69,7 @@ class ProfileSerializer(serializers.Serializer):                                
         blocked_users = validated_data.pop('blocked_users', [])
         profile = Profile.objects.create(
             user=validated_data['user'],
-            slug=validated_data['user'].name,
+            slug=validated_data['user'].username,
             is_private=validated_data.get('is_private', False),
             bio=validated_data.get('bio'),
             profile_pic=validated_data.get('profile_pic'),
@@ -78,16 +78,16 @@ class ProfileSerializer(serializers.Serializer):                                
             profile.blocked_users.set(blocked_users)
         return profile
 
-    def validate_slug(self, value):
-        slug = slugify(value)
-        if not slug:
-            raise serializers.ValidationError('На ТЕГ должны быть буквы или цифры.')
-        slugs = Profile.objects.filter(slug=slug)
-        if self.instance is not None:
-            slugs = slugs.exclude(slug=self.instance.slug)
-        if slugs.exists():
-            raise serializers.ValidationError('Тег такой есть уже существует.')
-        return slug
+    # def validate_slug(self, value):
+    #     slug = slugify(value)
+    #     if not slug:
+    #         raise serializers.ValidationError('На ТЕГ должны быть буквы или цифры.')
+    #     slugs = Profile.objects.filter(slug=slug)
+    #     if self.instance is not None:
+    #         slugs = slugs.exclude(slug=self.instance.slug)
+    #     if slugs.exists():
+    #         raise serializers.ValidationError('Тег такой есть уже существует.')
+    #     return slug
 
     def update(self, instance, validated_data):
         validated_data.pop('user', None)
@@ -99,8 +99,8 @@ class ProfileSerializer(serializers.Serializer):                                
 
         instance.save()
 
-        if blocked_users is not None:
-            instance.blocked_users.set(blocked_users)
+        # if blocked_users is not None:
+        #     instance.blocked_users.set(blocked_users)
 
         return instance
 
@@ -114,13 +114,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):                                                           # UNSTABLE
         profile_data = validated_data.pop('profile')
-        profile = ProfileSerializer(data=profile_data, context=self.context)
-        profile.is_valid(raise_exception=True)
-        user = User.objects.create_user(
+        # profile = ProfileSerializer(data=profile_data, context=self.context)
+        # profile.is_valid(raise_exception=True)
+        user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
         )
-        profile.save(user=user, **profile.validated_data)
+        profile = Profile.objects.create(user=user, name=profile_data['name'])
         return user, profile
 

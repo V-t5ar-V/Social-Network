@@ -15,7 +15,7 @@ class Profile(models.Model):
     slug = models.SlugField(max_length=30, unique=True, editable=True)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.slug)
+        self.slug = slugify(self.user.username)
         super().save(*args, **kwargs)
 
     def __str__(self):

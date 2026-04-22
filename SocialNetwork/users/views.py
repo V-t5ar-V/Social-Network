@@ -15,7 +15,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
     serializer_class = SubscriptionSerializer
 
     @action(methods=['get'], detail=False)
-    def following(self, request, slug=None):
+    def get_following(self, request, slug=None):
         profile_queryset = Profile.objects.all()
         profile = get_object_or_404(profile_queryset, slug=slug)
         if profile.is_private:
@@ -29,7 +29,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False)
-    def follower(self, request, slug=None):
+    def get_followers(self, request, slug=None):
         profile_queryset = Profile.objects.all()
         profile = get_object_or_404(profile_queryset, slug=slug)
         if profile.is_private:
@@ -93,17 +93,17 @@ class ProfileViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ProfileSerializer
 
-    def create(self, request):
-        data = request.data
-        user = request.user
-        serializer = self.serializer_class(data=data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save(user=user)
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def create(self, request):
+    #     data = request.data
+    #     user = request.user
+    #     serializer = self.serializer_class(data=data, context={'request': request})
+    #     if serializer.is_valid():
+    #         serializer.save(user=user)
+    #         return Response(
+    #             serializer.data,
+    #             status=status.HTTP_201_CREATED
+    #         )
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, slug=None):
         queryset = Profile.objects.all()
@@ -158,25 +158,28 @@ class UserRegisterAPIView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def partial_update(self, request):
+        pass
 
 
 
-class CheckTagAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    class_model = Profile
 
-    def post(self, request):
-        data = request.data
-        tag = data.get('tag') or data.get('slug')
-        if not tag:
-            return Response({'title': 'РџРµСЂРµРґР°Р№С‚Рµ tag РёР»Рё slug.'}, status=status.HTTP_400_BAD_REQUEST)
-        slug = slugify(tag)
-        if not slug:
-            return Response({'title': 'РќР° РўР•Р“ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р±СѓРєРІС‹ РёР»Рё С†РёС„СЂС‹.'}, status=status.HTTP_400_BAD_REQUEST)
-        slug_exists = self.class_model.objects.filter(slug=slug).exists()
-        if slug_exists:
-            return Response({'is_free': False}, status=status.HTTP_200_OK)
-        return Response({'is_free': True}, status=status.HTTP_200_OK)
-
-
-
+# class CheckTagAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#     class_model = Profile
+#
+#     def post(self, request):
+#         data = request.data
+#         tag = data.get('tag') or data.get('slug')
+#         if not tag:
+#             return Response({'title': 'РџРµСЂРµРґР°Р№С‚Рµ tag РёР»Рё slug.'}, status=status.HTTP_400_BAD_REQUEST)
+#         slug = slugify(tag)
+#         if not slug:
+#             return Response({'title': 'РќР° РўР•Р“ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р±СѓРєРІС‹ РёР»Рё С†РёС„СЂС‹.'}, status=status.HTTP_400_BAD_REQUEST)
+#         slug_exists = self.class_model.objects.filter(slug=slug).exists()
+#         if slug_exists:
+#             return Response({'is_free': False}, status=status.HTTP_200_OK)
+#         return Response({'is_free': True}, status=status.HTTP_200_OK)
+#
+#
+#

@@ -1,4 +1,4 @@
-from .views import UserRegisterAPIView, ProfileViewSet, CheckTagAPIView, SubscriptionViewSet
+from .views import UserRegisterAPIView, ProfileViewSet, SubscriptionViewSet #CheckTagAPIView
 
 from django.urls import path
 
@@ -6,17 +6,17 @@ from django.urls import path
 
 urlpatterns = [
     path('register/', UserRegisterAPIView.as_view(), name='register'),
-    path('check-tag/', CheckTagAPIView.as_view(), name='check_tag'),
-    path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
+    # path('check-tag/', CheckTagAPIView.as_view(), name='check_tag'),
+    # path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
         'get': 'retrieve',
         'delete': 'destroy'
     }) ,name='profile'),
     path('profiles/detail/<slug:slug>/following/', SubscriptionViewSet.as_view({
-        'get': 'following',
+        'get': 'get_following',
     }), name='following'),
     path('profiles/detail/<slug:slug>/followers/', SubscriptionViewSet.as_view({
-        'get': 'follower',
+        'get': 'get_followers',
     }), name='followers'),
     path('subscriptions/', SubscriptionViewSet.as_view({
         'post': 'create',
