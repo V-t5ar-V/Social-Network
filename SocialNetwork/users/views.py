@@ -131,13 +131,10 @@ class ProfileViewSet(viewsets.ViewSet):
     def block_user(self, request, slug=None):
         blocked_user = get_object_or_404(User, username=slug)
         profile = Profile.objects.get(user=request.user)
-        blacklist = profile.blocked_users
-        blacklist.add(blocked_user)
-        blacklist = list(blacklist.all())
         serializer = self.serializer_class(
             profile,
 
-            data={'blocked_users': blacklist},
+            data={'blocked_users': blocked_user},
             context={'request': request},
             partial=True
         )
@@ -150,13 +147,10 @@ class ProfileViewSet(viewsets.ViewSet):
     def unblock_user(self, request, slug=None):
         unblocked_user = get_object_or_404(User, username=slug)
         profile = Profile.objects.get(user=request.user)
-        blacklist = profile.blocked_users
-        blacklist.remove(unblocked_user)
-        blacklist = list(blacklist.all())
         serializer = self.serializer_class(
             profile,
 
-            data={'blocked_users': blacklist},
+            data={'unblocked_users': unblocked_user},
             context={'request': request},
             partial=True
         )

@@ -60,6 +60,7 @@ class ProfileSerializer(serializers.Serializer):                                
     user = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
     is_private = serializers.BooleanField(default=False, allow_null=True)
     blocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
+    unblocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
     bio = serializers.CharField(max_length=750, required=False, allow_blank=True)
     profile_pic = serializers.FileField(required=False, allow_null=True)
     is_online = serializers.BooleanField(default=False)
@@ -99,15 +100,19 @@ class ProfileSerializer(serializers.Serializer):                                
         validated_data.pop('user', None)
         validated_data.pop('is_online', None)
         blocked_users = validated_data.pop('blocked_users', None)
+        unblocked_users = validated_data.pop('unblocked_users', None)
 
         for field, value in validated_data.items():
             setattr(instance, field, value)
 
-        instance.save()
-
         if blocked_users is not None:
-            instance.blocked_users.set(blocked_users)
+            instance.blocked_users.add(*blocked_users)
 
+        if unblocked_users is not None:
+            instance.blocked_users.remove(*unblocked_users)
+
+
+        instance.save()
         return instance
 
 

@@ -33,11 +33,9 @@ urlpatterns = [
     }), name='delete_subscription'),
 
 
-
-
     path('blacklist/add/<slug:slug>/', ProfileViewSet.as_view({
         'patch': 'block_user',
-    }), name='blocked_users'),
+    }), name='block_user'),
     path('blacklist/remove/<slug:slug>/', ProfileViewSet.as_view({
         'patch': 'unblock_user',
     }), name='unblock_user'),
