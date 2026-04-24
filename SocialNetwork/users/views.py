@@ -4,7 +4,7 @@ from .serializers import UserRegistrationSerializer, ProfileSerializer, Subscrip
 from rest_framework.response import Response
 from .models import Profile, Subscription
 from rest_framework.generics import get_object_or_404
-from django.utils.text import slugify
+from django.contrib.auth.models import User
 from rest_framework.decorators import action
 
 
@@ -16,10 +16,12 @@ class SubscriptionViewSet(viewsets.ViewSet):
 
     @action(methods=['get'], detail=False)
     def get_following(self, request, slug=None):
+        queryset = Subscription.objects.all()
         profile_queryset = Profile.objects.all()
         profile = get_object_or_404(profile_queryset, slug=slug)
         if profile.is_private:
-            if not profile.user.follower.filter(follower=request.user).exists():
+            followers = queryset.filter(follower=request.user)
+            if not followers.exists():
                 return Response({'title': 'только подписчики могут посмотреть список подписок'}, status=status.HTTP_403_FORBIDDEN)
         user = profile.user
         queryset = Subscription.objects.filter(follower=user)
@@ -93,17 +95,6 @@ class ProfileViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ProfileSerializer
 
-    # def create(self, request):
-    #     data = request.data
-    #     user = request.user
-    #     serializer = self.serializer_class(data=data, context={'request': request})
-    #     if serializer.is_valid():
-    #         serializer.save(user=user)
-    #         return Response(
-    #             serializer.data,
-    #             status=status.HTTP_201_CREATED
-    #         )
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, slug=None):
         queryset = Profile.objects.all()
@@ -136,6 +127,45 @@ class ProfileViewSet(viewsets.ViewSet):
         user.delete()
         return Response({"title": "профиль удален"}, status=status.HTTP_204_NO_CONTENT)
 
+    @action(methods=['patch'], detail=True)
+    def block_user(self, request, slug=None):
+        blocked_user = get_object_or_404(User, username=slug)
+        profile = Profile.objects.get(user=request.user)
+        blacklist = profile.blocked_users
+        blacklist.add(blocked_user)
+        blacklist = list(blacklist.all())
+        serializer = self.serializer_class(
+            profile,
+
+            data={'blocked_users': blacklist},
+            context={'request': request},
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"title": "Пользователь заюлокирован."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['patch'], detail=True)
+    def unblock_user(self, request, slug=None):
+        unblocked_user = get_object_or_404(User, username=slug)
+        profile = Profile.objects.get(user=request.user)
+        blacklist = profile.blocked_users
+        blacklist.remove(unblocked_user)
+        blacklist = list(blacklist.all())
+        serializer = self.serializer_class(
+            profile,
+
+            data={'blocked_users': blacklist},
+            context={'request': request},
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"title": "Пользователь разблокирован."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
@@ -164,22 +194,19 @@ class UserRegisterAPIView(APIView):
 
 
 
-# class CheckTagAPIView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-#     class_model = Profile
-#
-#     def post(self, request):
-#         data = request.data
-#         tag = data.get('tag') or data.get('slug')
-#         if not tag:
-#             return Response({'title': 'РџРµСЂРµРґР°Р№С‚Рµ tag РёР»Рё slug.'}, status=status.HTTP_400_BAD_REQUEST)
-#         slug = slugify(tag)
-#         if not slug:
-#             return Response({'title': 'РќР° РўР•Р“ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р±СѓРєРІС‹ РёР»Рё С†РёС„СЂС‹.'}, status=status.HTTP_400_BAD_REQUEST)
-#         slug_exists = self.class_model.objects.filter(slug=slug).exists()
-#         if slug_exists:
-#             return Response({'is_free': False}, status=status.HTTP_200_OK)
-#         return Response({'is_free': True}, status=status.HTTP_200_OK)
-#
-#
-#
+class CheckUsernamePIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    class_model = User
+
+    def post(self, request):
+        data = request.data
+        username = data.get('username', None)
+        if not username:
+            return Response({'title': 'РџРµСЂРµРґР°Р№С‚Рµ tag РёР»Рё slug.'}, status=status.HTTP_400_BAD_REQUEST)
+        username_exists = self.class_model.objects.filter(username=username).exists()
+        if username_exists:
+            return Response({'is_free': False}, status=status.HTTP_200_OK)
+        return Response({'is_free': True}, status=status.HTTP_200_OK)
+
+
+

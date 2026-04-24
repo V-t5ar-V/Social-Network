@@ -1,4 +1,4 @@
-from .views import UserRegisterAPIView, ProfileViewSet, SubscriptionViewSet #CheckTagAPIView
+from .views import UserRegisterAPIView, ProfileViewSet, SubscriptionViewSet, CheckUsernamePIView
 
 from django.urls import path
 
@@ -6,11 +6,12 @@ from django.urls import path
 
 urlpatterns = [
     path('register/', UserRegisterAPIView.as_view(), name='register'),
-    # path('check-tag/', CheckTagAPIView.as_view(), name='check_tag'),
+    path('check-username/', CheckUsernamePIView.as_view(), name='check_username'),
     # path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
         'get': 'retrieve',
-        'delete': 'destroy'
+        'delete': 'destroy',
+        'patch': 'partial_update',
     }) ,name='profile'),
     path('profiles/detail/<slug:slug>/following/', SubscriptionViewSet.as_view({
         'get': 'get_following',
@@ -34,9 +35,14 @@ urlpatterns = [
 
 
 
+    path('blacklist/add/<slug:slug>/', ProfileViewSet.as_view({
+        'patch': 'block_user',
+    }), name='blocked_users'),
+    path('blacklist/remove/<slug:slug>/', ProfileViewSet.as_view({
+        'patch': 'unblock_user',
+    }), name='unblock_user'),
+
 
     # path('profiles/<slug:slug>/qr_code', noview(),name='QR_code'),
-    # path('profiles/<slug:slug>/blacklist', noview(), name='blocked_users'),
-    # path('profiles/<slug:slug>/blacklist/<slug:slug>', noview(), name='remove_blacklisted_user'),
     # path('profiles/<slug:slug>/posts/', noview(), name='posts_list'),
 ]

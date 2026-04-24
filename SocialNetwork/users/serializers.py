@@ -5,7 +5,8 @@ from .models import Profile, Subscription
 
 class SubscriptionSerializer(serializers.Serializer):
     following = serializers.CharField(max_length=30)
-    is_accepted = serializers.BooleanField(default=True)
+    follower = serializers.CharField(read_only=True)
+    is_accepted = serializers.BooleanField(default=True, required=False)
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
@@ -14,29 +15,34 @@ class SubscriptionSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         me = validated_data['user'].profile
-        if validated_data['following'] == me:
-            return serializers.ValidationError('нельзя подписаться на самого себя')
+        print(me)
+        following_profile = Profile.objects.filter(slug=validated_data['following']).select_related('user').first()
+        if following_profile is None:
+            raise serializers.ValidationError({'following': 'Профиль не найден.'})
 
-        following_profile = Profile.objects.get(slug=validated_data['following'])
-        following_user = following_profile.user
-        matching_subscription = Profile.objects.filter(following=following_user, follower=validated_data['user'])
+        if following_profile == me:
+            raise serializers.ValidationError({'following': 'Нельзя подписаться на самого себя.'})
+
+        if me.blocked_users.filter(pk=following_profile.user_id).exists() or following_profile.blocked_users.filter(
+                pk=me.user_id).exists():
+            raise serializers.ValidationError({'following': 'Подписка недоступна.'})
+
+        matching_subscription = Subscription.objects.filter(
+            following=following_profile.user,
+            follower=validated_data['user'],
+        )
         if matching_subscription.exists():
-            return serializers.ValidationError('нельзя подписаться на пользователя дважды')
-
-        if following_profile.is_private:
-            subscription_result = False
-        else:
-            subscription_result = True
-
+            raise serializers.ValidationError({'following': 'Подписка уже существует.'})
 
         subscription = Subscription.objects.create(
-            following=validated_data['following'],
+            following=following_profile.user,
             follower=validated_data['user'],
-            is_accepted=subscription_result,
+            is_accepted=not following_profile.is_private,
         )
         return subscription
 
-    def update(self, instance, validated_data):
+
+def update(self, instance, validated_data):
         if 'is_accepted' in validated_data:
             if validated_data['is_accepted']:
                 instance.following = validated_data.get('is_accepted', instance.is_accepted)
@@ -99,8 +105,8 @@ class ProfileSerializer(serializers.Serializer):                                
 
         instance.save()
 
-        # if blocked_users is not None:
-        #     instance.blocked_users.set(blocked_users)
+        if blocked_users is not None:
+            instance.blocked_users.set(blocked_users)
 
         return instance
 
@@ -121,6 +127,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password'],
         )
-        profile = Profile.objects.create(user=user, name=profile_data['name'])
-        return user, profile
+        Profile.objects.create(user=user, name=profile_data['name'])
+        return user
 
