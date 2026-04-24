@@ -1,11 +1,16 @@
-from .views import UserRegisterAPIView, ProfileViewSet, SubscriptionViewSet, CheckUsernamePIView
+from .views import UserViewSet, ProfileViewSet, SubscriptionViewSet, CheckUsernamePIView
 
 from django.urls import path
 
 
 
 urlpatterns = [
-    path('register/', UserRegisterAPIView.as_view(), name='register'),
+    path('register/', UserViewSet.as_view({
+        'post': 'create',
+    }), name='register'),
+    path('edit_user/', UserViewSet.as_view({
+        'patch': 'partial_update',
+    })),
     path('check-username/', CheckUsernamePIView.as_view(), name='check_username'),
     # path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({

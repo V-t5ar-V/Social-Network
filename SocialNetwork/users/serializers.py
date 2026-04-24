@@ -42,7 +42,7 @@ class SubscriptionSerializer(serializers.Serializer):
         return subscription
 
 
-def update(self, instance, validated_data):
+    def update(self, instance, validated_data):
         if 'is_accepted' in validated_data:
             if validated_data['is_accepted']:
                 instance.following = validated_data.get('is_accepted', instance.is_accepted)
@@ -59,8 +59,8 @@ def update(self, instance, validated_data):
 class ProfileSerializer(serializers.Serializer):                                            #UNSTABLE
     user = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
     is_private = serializers.BooleanField(default=False, allow_null=True)
-    blocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
-    unblocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
+    blocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False,write_only=True)
+    unblocked_users = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     bio = serializers.CharField(max_length=750, required=False, allow_blank=True)
     profile_pic = serializers.FileField(required=False, allow_null=True)
     is_online = serializers.BooleanField(default=False)
@@ -99,24 +99,25 @@ class ProfileSerializer(serializers.Serializer):                                
     def update(self, instance, validated_data):
         validated_data.pop('user', None)
         validated_data.pop('is_online', None)
+        username = validated_data.pop('username', None)
         blocked_users = validated_data.pop('blocked_users', None)
         unblocked_users = validated_data.pop('unblocked_users', None)
-
+        if username:
+            instance.user.username = username
         for field, value in validated_data.items():
             setattr(instance, field, value)
 
+        instance.save()
         if blocked_users is not None:
             instance.blocked_users.add(*blocked_users)
 
         if unblocked_users is not None:
             instance.blocked_users.remove(*unblocked_users)
 
-
-        instance.save()
         return instance
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     profile = ProfileSerializer(required=False)
     class Meta:
@@ -134,4 +135,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         Profile.objects.create(user=user, name=profile_data['name'])
         return user
+
+    def update(self, instance, validated_data):
+        username = validated_data.pop('username', None)
+        email = validated_data.pop('email', None)
+        if username:
+            instance.username = username
+        if email:
+            instance.email = email
+        instance.save()
+        return instance
+
+
 

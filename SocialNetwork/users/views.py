@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
-from .serializers import UserRegistrationSerializer, ProfileSerializer, SubscriptionSerializer
+from .serializers import UserSerializer, ProfileSerializer, SubscriptionSerializer
 from rest_framework.response import Response
 from .models import Profile, Subscription
 from rest_framework.generics import get_object_or_404
@@ -103,7 +103,9 @@ class ProfileViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(profile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def partial_update(self, request):
+    def partial_update(self, request, slug=None):
+        if request.user.username != slug:
+            return Response({'title':'Нельзя редактировать профиль, который не принадлежит вам.'}, status=status.HTTP_403_FORBIDDEN)
         queryset = Profile.objects.all()
         profile = get_object_or_404(queryset, user=request.user)
         serializer = self.serializer_class(
@@ -133,8 +135,7 @@ class ProfileViewSet(viewsets.ViewSet):
         profile = Profile.objects.get(user=request.user)
         serializer = self.serializer_class(
             profile,
-
-            data={'blocked_users': blocked_user},
+            data={'blocked_users': [blocked_user.id]},
             context={'request': request},
             partial=True
         )
@@ -160,20 +161,19 @@ class ProfileViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class PostAllowAny(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return True
+        return request.user and request.user.is_authenticated
 
 
-
-
-
-class UserRegisterAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
-    serializer_class = UserRegistrationSerializer
-
-    def get(self, request):
-        return Response({'title': f'метод не разрешен, {request.data}'})
+class UserViewSet(viewsets.ViewSet):
+    lookup_field = 'username'
+    permission_classes = [PostAllowAny]
 
     def post(self, request):                        # UNSTABLE
-        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer = UserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -183,7 +183,12 @@ class UserRegisterAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request):
-        pass
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, context={'request': request}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -196,7 +201,7 @@ class CheckUsernamePIView(APIView):
         data = request.data
         username = data.get('username', None)
         if not username:
-            return Response({'title': 'РџРµСЂРµРґР°Р№С‚Рµ tag РёР»Рё slug.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'title': 'Имя пользователя обязательно.'}, status=status.HTTP_400_BAD_REQUEST)
         username_exists = self.class_model.objects.filter(username=username).exists()
         if username_exists:
             return Response({'is_free': False}, status=status.HTTP_200_OK)
