@@ -12,11 +12,12 @@ urlpatterns = [
         'patch': 'partial_update',
     })),
     path('check-username/', CheckUsernamePIView.as_view(), name='check_username'),
-    # path('profiles/', ProfileViewSet.as_view({'post':'create'}),name='create_profile'),
+    path('profiles/edit_my_profile/', ProfileViewSet.as_view({
+        'patch': 'partial_update',
+    })),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
         'get': 'retrieve',
         'delete': 'destroy',
-        'patch': 'partial_update',
     }) ,name='profile'),
     path('profiles/detail/<slug:slug>/following/', SubscriptionViewSet.as_view({
         'get': 'get_following',

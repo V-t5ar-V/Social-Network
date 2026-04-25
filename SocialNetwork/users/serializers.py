@@ -57,6 +57,7 @@ class SubscriptionSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.Serializer):                                            #UNSTABLE
+    username = serializers.SlugField(max_length=30, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
     is_private = serializers.BooleanField(default=False, allow_null=True)
     blocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False,write_only=True)
@@ -97,13 +98,14 @@ class ProfileSerializer(serializers.Serializer):                                
     #     return slug
 
     def update(self, instance, validated_data):
-        validated_data.pop('user', None)
         validated_data.pop('is_online', None)
         username = validated_data.pop('username', None)
         blocked_users = validated_data.pop('blocked_users', None)
         unblocked_users = validated_data.pop('unblocked_users', None)
         if username:
-            instance.user.username = username
+            user = instance.user
+            user.username = username
+            user.save()
         for field, value in validated_data.items():
             setattr(instance, field, value)
 

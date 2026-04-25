@@ -103,9 +103,7 @@ class ProfileViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(profile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def partial_update(self, request, slug=None):
-        if request.user.username != slug:
-            return Response({'title':'Нельзя редактировать профиль, который не принадлежит вам.'}, status=status.HTTP_403_FORBIDDEN)
+    def partial_update(self, request):
         queryset = Profile.objects.all()
         profile = get_object_or_404(queryset, user=request.user)
         serializer = self.serializer_class(
