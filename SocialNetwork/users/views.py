@@ -125,31 +125,38 @@ class ProfileViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         user = profile.user
         user.delete()
-        return Response({"title": "профиль удален"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"title": "Учетная запись удалена."}, status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['patch'], detail=True)
     def block_user(self, request, slug=None):
         blocked_user = get_object_or_404(User, username=slug)
+        print(blocked_user.pk)
         profile = Profile.objects.get(user=request.user)
+        print(profile, profile.pk, profile.name)
         serializer = self.serializer_class(
             profile,
-            data={'blocked_users': [blocked_user.id]},
+            data={'target_user': blocked_user,
+                  'action': 'block'
+                  },
             context={'request': request},
             partial=True
         )
         if serializer.is_valid():
             serializer.save()
-            return Response({"title": "Пользователь заюлокирован."}, status=status.HTTP_200_OK)
+            return Response({"title": "Пользователь заблокирован."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['patch'], detail=True)
     def unblock_user(self, request, slug=None):
         unblocked_user = get_object_or_404(User, username=slug)
         profile = Profile.objects.get(user=request.user)
+
         serializer = self.serializer_class(
             profile,
 
-            data={'unblocked_users': unblocked_user},
+            data={'target_user': unblocked_user,
+                  'action': 'unblock'
+                  },
             context={'request': request},
             partial=True
         )

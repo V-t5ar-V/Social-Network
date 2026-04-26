@@ -1,3 +1,4 @@
+from django.contrib.admin import action
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.utils.text import slugify
@@ -58,10 +59,12 @@ class SubscriptionSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.Serializer):                                            #UNSTABLE
     username = serializers.SlugField(max_length=30, required=False)
+    id = serializers.IntegerField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
     is_private = serializers.BooleanField(default=False, allow_null=True)
-    blocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False,write_only=True)
-    unblocked_users = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    blocked_users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
+    target_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False, write_only=True)
+    action = serializers.ChoiceField(choices=['block', 'unblock'], required=False, write_only=True)
     bio = serializers.CharField(max_length=750, required=False, allow_blank=True)
     profile_pic = serializers.FileField(required=False, allow_null=True)
     is_online = serializers.BooleanField(default=False)
@@ -70,7 +73,7 @@ class ProfileSerializer(serializers.Serializer):                                
 
     class Meta:
         model = Profile
-        fields = ('user','is_private', 'blocked_users', 'bio', 'profile_pic', 'is_online', 'slug', 'name')
+        fields = ('id', 'user','is_private', 'blocked_users', 'bio', 'profile_pic', 'is_online', 'slug', 'name')
 
 
     def create(self, validated_data):
@@ -99,9 +102,10 @@ class ProfileSerializer(serializers.Serializer):                                
 
     def update(self, instance, validated_data):
         validated_data.pop('is_online', None)
+        validated_data.pop('blocked_users')
         username = validated_data.pop('username', None)
-        blocked_users = validated_data.pop('blocked_users', None)
-        unblocked_users = validated_data.pop('unblocked_users', None)
+        target = validated_data.pop('target_user', None)
+        act = validated_data.pop('action', None)
         if username:
             user = instance.user
             user.username = username
@@ -110,11 +114,12 @@ class ProfileSerializer(serializers.Serializer):                                
             setattr(instance, field, value)
 
         instance.save()
-        if blocked_users is not None:
-            instance.blocked_users.add(*blocked_users)
 
-        if unblocked_users is not None:
-            instance.blocked_users.remove(*unblocked_users)
+        if act == 'block' and target:
+            instance.profile.blocked_users.add(target)
+        elif act == 'unblock' and target:
+            instance.profile.blocked_users.remove(target)
+
 
         return instance
 
