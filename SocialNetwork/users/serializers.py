@@ -1,7 +1,5 @@
-from django.contrib.admin import action
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 from .models import Profile, Subscription
 
 class SubscriptionSerializer(serializers.Serializer):
@@ -102,7 +100,7 @@ class ProfileSerializer(serializers.Serializer):                                
 
     def update(self, instance, validated_data):
         validated_data.pop('is_online', None)
-        validated_data.pop('blocked_users')
+        validated_data.pop('blocked_users', None)
         username = validated_data.pop('username', None)
         target = validated_data.pop('target_user', None)
         act = validated_data.pop('action', None)
@@ -116,9 +114,11 @@ class ProfileSerializer(serializers.Serializer):                                
         instance.save()
 
         if act == 'block' and target:
-            instance.profile.blocked_users.add(target)
+            if target == instance.user:
+                raise serializers.ValidationError({'target_user': 'Нельзя заблокировать самого себя.'})
+            instance.blocked_users.add(target)
         elif act == 'unblock' and target:
-            instance.profile.blocked_users.remove(target)
+            instance.blocked_users.remove(target)
 
 
         return instance

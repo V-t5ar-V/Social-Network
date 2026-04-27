@@ -130,12 +130,15 @@ class ProfileViewSet(viewsets.ViewSet):
     @action(methods=['patch'], detail=True)
     def block_user(self, request, slug=None):
         blocked_user = get_object_or_404(User, username=slug)
-        print(blocked_user.pk)
         profile = Profile.objects.get(user=request.user)
-        print(profile, profile.pk, profile.name)
+        if blocked_user == request.user:
+            return Response(
+                {"target_user": "Нельзя заблокировать самого себя."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = self.serializer_class(
             profile,
-            data={'target_user': blocked_user,
+            data={'target_user': blocked_user.pk,
                   'action': 'block'
                   },
             context={'request': request},
@@ -154,7 +157,7 @@ class ProfileViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(
             profile,
 
-            data={'target_user': unblocked_user,
+            data={'target_user': unblocked_user.pk,
                   'action': 'unblock'
                   },
             context={'request': request},

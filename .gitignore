@@ -1,0 +1,9 @@
+# Local Python dependencies
+SocialNetwork/.deps/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Local SQLite journal
+SocialNetwork/db.sqlite3-journal
