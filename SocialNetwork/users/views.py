@@ -1,5 +1,4 @@
 from rest_framework import viewsets, permissions, status
-from rest_framework.views import APIView
 from .serializers import UserSerializer, ProfileSerializer, SubscriptionSerializer
 from rest_framework.response import Response
 from .models import Profile, Subscription
@@ -101,7 +100,10 @@ class ProfileViewSet(viewsets.ViewSet):
         profile = get_object_or_404(queryset, slug=slug)
 
         serializer = self.serializer_class(profile, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = dict(serializer.data)
+        if request.user != profile.user:
+            del data['blocked_users']
+        return Response(data=data, status=status.HTTP_200_OK)
 
     def partial_update(self, request):
         queryset = Profile.objects.all()
@@ -180,7 +182,7 @@ class UserViewSet(viewsets.ViewSet):
     lookup_field = 'username'
     permission_classes = [PostAllowAny]
 
-    def post(self, request):                        # UNSTABLE
+    def post(self, request):
         serializer = UserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -198,22 +200,14 @@ class UserViewSet(viewsets.ViewSet):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
-class CheckUsernamePIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    class_model = User
-
-    def post(self, request):
-        data = request.data
-        username = data.get('username', None)
-        if not username:
-            return Response({'title': 'Имя пользователя обязательно.'}, status=status.HTTP_400_BAD_REQUEST)
-        username_exists = self.class_model.objects.filter(username=username).exists()
+    @action(methods=['get'], detail=True)
+    def check_username(self, request, slug=None):
+        username = slug
+        username_exists = User.objects.filter(username=username).exists()
         if username_exists:
             return Response({'is_free': False}, status=status.HTTP_200_OK)
         return Response({'is_free': True}, status=status.HTTP_200_OK)
+
 
 
 

@@ -1,4 +1,4 @@
-from .views import UserViewSet, ProfileViewSet, SubscriptionViewSet, CheckUsernamePIView
+from .views import UserViewSet, ProfileViewSet, SubscriptionViewSet
 
 from django.urls import path
 
@@ -11,7 +11,9 @@ urlpatterns = [
     path('edit_user/', UserViewSet.as_view({
         'patch': 'partial_update',
     })),
-    path('check-username/', CheckUsernamePIView.as_view(), name='check_username'),
+    path('check-username/<slug:slug>', UserViewSet.as_view({
+        'get': 'check_username',
+    }), name='check_username'),
     path('profiles/edit_my_profile/', ProfileViewSet.as_view({
         'patch': 'partial_update',
     })),

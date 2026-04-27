@@ -87,17 +87,6 @@ class ProfileSerializer(serializers.Serializer):                                
             profile.blocked_users.set(blocked_users)
         return profile
 
-    # def validate_slug(self, value):
-    #     slug = slugify(value)
-    #     if not slug:
-    #         raise serializers.ValidationError('На ТЕГ должны быть буквы или цифры.')
-    #     slugs = Profile.objects.filter(slug=slug)
-    #     if self.instance is not None:
-    #         slugs = slugs.exclude(slug=self.instance.slug)
-    #     if slugs.exists():
-    #         raise serializers.ValidationError('Тег такой есть уже существует.')
-    #     return slug
-
     def update(self, instance, validated_data):
         validated_data.pop('is_online', None)
         validated_data.pop('blocked_users', None)
