@@ -1,6 +1,10 @@
 from django.urls import path
+from .views import PostViewSet
 urlpatterns = [
-    path('posts/', noview, name='posts_list'),
+    path('posts/',PostViewSet.as_view({
+        'post': 'create',
+        # 'get': 'list',
+    }), name='posts'),
 #     path('posts/<slug:slug>', noview, name='posts_detail'),
 #     path('posts/<slug:slug>/comments/', noview, name='comments_list'),
 #     path('comments/<int:pk>/', noview, name='comments'),

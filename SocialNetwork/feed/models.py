@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
+from randomslugfield import RandomSlugField
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=100)
@@ -8,7 +9,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField('Tag', related_name='tags', blank=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    slug = RandomSlugField(length=10, unique=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -20,7 +21,7 @@ class Media(models.Model):
     file = models.FileField(upload_to='media/')
 
 class Tag(models.Model):
-    tag = models.CharField(max_length=20, primary_key=True)
+    tag = models.SlugField(max_length=20, unique=True, primary_key=True)
 
 class Comment(models.Model):
     text = models.CharField(max_length=200)
@@ -36,7 +37,6 @@ class Like(models.Model):
     class Meta:
         unique_together = ('user', 'post')
 
-class PostView(models.Model):
-    post = models.ForeignKey('Post', on_delete=models.CASCADE)
+class Post_View(models.Model):
     viewer = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
