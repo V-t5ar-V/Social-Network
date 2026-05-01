@@ -1,12 +1,8 @@
 from rest_framework import viewsets, permissions, status
-from .serializers import PostSerializer
 from rest_framework.response import Response
-from .models import Post, Media, Tag, Comment, Like, Post_View
-from rest_framework.generics import get_object_or_404
-from django.contrib.auth.models import User
-from rest_framework.decorators import action
 
-# Create your views here.
+from .serializers import PostSerializer
+
 
 class PostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -17,15 +13,15 @@ class PostViewSet(viewsets.ViewSet):
 
     def create(self, request):
         user = request.user
+        raw_tags = request.data.get('tags', '')
 
-        tags = request.data['tags']
-        tags = tags.split(',')
-        data = dict(request.data)
-        data['tags'] = tags
-        data['title'] = data['title'][0]
-        data['description'] = data['description'][0]
+        if isinstance(raw_tags, str):
+            tags = [tag.strip() for tag in raw_tags.split(',') if tag.strip()]
+        else:
+            tags = raw_tags
 
-
+        data = request.data.copy()
+        data.setlist('tags', tags)
 
         serializer = self.serializer_class(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)

@@ -1,6 +1,4 @@
-from django.template.context_processors import media
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from .models import Post, Media, Tag, Comment, Like, Post_View
 from django.utils import timezone
 
@@ -26,6 +24,24 @@ class PostSerializer(serializers.Serializer):
     class Meta:
         model = Post
         fields = ['title', 'user', 'created_at', 'description', 'tags', 'slug']
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        media_files = []
+        for media_obj in instance.media.all():
+            file_url = media_obj.file.url if media_obj.file else None
+            if request is not None and file_url is not None:
+                file_url = request.build_absolute_uri(file_url)
+            media_files.append(file_url)
+
+        return {
+            'title': instance.title,
+            'created_at': instance.created_at,
+            'description': instance.description,
+            'tags': [tag.tag for tag in instance.tags.all()],
+            'slug': instance.slug,
+            'media': media_files,
+        }
 
     def validate_video(self, value):
         max_video_size = 150 * 1024 * 1024
@@ -72,13 +88,11 @@ class PostSerializer(serializers.Serializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags', [])
         media_files = validated_data.pop('media', [])
-        print(media_files)
         self.validate_media_files(media_files)
 
         post = Post.objects.create(**validated_data)
         for file in media_files:
             Media.objects.create(post=post, file=file)
-        post.save()
         tags_objects = []
         if tags:
             for tag_name in tags:
