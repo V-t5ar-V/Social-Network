@@ -122,9 +122,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):                                                           # UNSTABLE
         profile_data = validated_data.pop('profile')
-        # profile = ProfileSerializer(data=profile_data, context=self.context)
-        # profile.is_valid(raise_exception=True)
-        user = User.objects.create(
+        user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],

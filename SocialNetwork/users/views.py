@@ -182,7 +182,7 @@ class UserViewSet(viewsets.ViewSet):
     lookup_field = 'username'
     permission_classes = [PostAllowAny]
 
-    def post(self, request):
+    def create(self, request):
         serializer = UserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()

@@ -11,17 +11,18 @@ class Post(models.Model):
     tags = models.ManyToManyField('Tag', related_name='tags', blank=True)
     slug = RandomSlugField(length=10, unique=True)
 
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.title)
-        super().save(*args, **kwargs)
 
 
 class Media(models.Model):
-    post = models.ForeignKey('Post', on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='media')
     file = models.FileField(upload_to='media/')
 
 class Tag(models.Model):
-    tag = models.SlugField(max_length=20, unique=True, primary_key=True)
+    tag = models.SlugField(max_length=20, unique=True)
+
+    def save(self, *args, **kwargs):
+        self.tag = slugify(self.tag)
+        super().save(*args, **kwargs)
 
 class Comment(models.Model):
     text = models.CharField(max_length=200)

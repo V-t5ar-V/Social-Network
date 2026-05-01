@@ -24,7 +24,6 @@ class PostViewSet(viewsets.ViewSet):
         data['tags'] = tags
         data['title'] = data['title'][0]
         data['description'] = data['description'][0]
-        print(data)
 
 
 
