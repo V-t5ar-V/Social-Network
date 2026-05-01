@@ -2,27 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d05896e-5039-42d9-a1d6-18d2530faacd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0002_rename_postview_post_view.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0003_remove_post_view_post.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0004_tag_id_alter_post_slug_alter_tag_tag.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0005_remove_tag_id_alter_tag_tag.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0002_remove_profile_user_tag_alter_profile_slug.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0003_profile_id_alter_profile_slug.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0004_profile_name.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0005_rebuild_profile_blocked_users.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

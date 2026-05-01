@@ -5,36 +5,13 @@ from .models import Post, Media, Tag, Comment, Like, Post_View
 from django.utils import timezone
 
 
-class MediaSerializer(serializers.Serializer):
+class MediaSerializer(serializers.ModelSerializer):
     file = serializers.FileField()
     post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
     class Meta:
         model = Media
         fields = '__all__'
 
-    def validate_media_size(self, values):
-        for value in values:
-            media_type = value.content_type
-            if media_type == 'image/jpeg' or media_type == 'image/png':
-                if value.size > 5 * 1024 * 1024:
-                    raise serializers.ValidationError(f'Размер изображения {value} слишком большой (> 5мб).')
-            if media_type == 'video/mp4' and value.size > 100 * 1024 * 1024:
-                raise serializers.ValidationError(f'Размер видео {value} слишком большой (> 100мб).')
-
-    def validate_media(self, values):
-        allowed_types = ['image/jpeg', 'image/png', 'video/mp4']
-        for value in values:
-            if value not in allowed_types:
-                raise serializers.ValidationError(f'Недопустимый тип медиа. {value})')
-            if value.content_type == 'video/mp4' and len(values) > 1:
-                raise serializers.ValidationError('добавление более 1 video не разрешено')
-            elif value.content_type in {'image/jpeg', 'image/png'} and len(values) > 30:
-                raise serializers.ValidationError('добавление более 30 image не разрешено')
-
-    def create(self, validated_data):
-        self.validate_media_size(validated_data.get('media', None))
-        self.validate_media(validated_data.get('media', None))
-        Media.objects.create(**validated_data)
 
 
 
@@ -67,11 +44,12 @@ class PostSerializer(serializers.Serializer):
 
     def validate_media_files(self, values):
         allowed_types = ['image/jpeg', 'image/png', 'video/mp4']
-        media_types_list = list(map(lambda elem: elem.content_type, values))
-
 
         if len(values) > 30:
             raise serializers.ValidationError('Слишком много медиафайлов')
+
+        media_types_list = list(map(lambda elem: elem.content_type, values))
+
         if 'video/mp4' in media_types_list and len(values) > 1:
             raise serializers.ValidationError('Разрешено только 1 видео')
 
