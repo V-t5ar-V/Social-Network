@@ -30,4 +30,4 @@ class Subscription(models.Model):
     # class Meta:
     #     unique_together = ('following', 'follower')
     def __str__(self):
-        return f'{self.pk}, following - {self.following}, follower - {self.follower}, is_accepted - {self.is_accepted}'
+        return f'{self.pk}, following - {self.following}, follower - {self.follower}, is_accepted - {self.subscription_status}'
