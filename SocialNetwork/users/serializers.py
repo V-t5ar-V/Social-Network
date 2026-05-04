@@ -3,53 +3,54 @@ from django.contrib.auth.models import User
 from .models import Profile, Subscription
 
 class SubscriptionSerializer(serializers.Serializer):
-    following = serializers.CharField(max_length=30)
-    follower = serializers.CharField(read_only=True)
-    is_accepted = serializers.BooleanField(default=True, required=False)
+    id = serializers.IntegerField(read_only=True)
+    following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    follower = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    subscription_status = serializers.ChoiceField(choices=['PENDING', 'ACCEPTED', 'REJECTED'], required=False)
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Subscription
-        fields = ('id, following', 'follower', 'is_accepted', 'created_at')
+        fields = ('id, following', 'follower', 'subscription_status', 'created_at')
 
     def create(self, validated_data):
-        me = validated_data['user'].profile
-        print(me)
-        following_profile = Profile.objects.filter(slug=validated_data['following']).select_related('user').first()
-        if following_profile is None:
-            raise serializers.ValidationError({'following': 'Профиль не найден.'})
+        me = validated_data['user']
+        following = validated_data['following']
 
-        if following_profile == me:
-            raise serializers.ValidationError({'following': 'Нельзя подписаться на самого себя.'})
+        if me in following.profile.blocked_users.all():
+            raise serializers.ValidationError('Подписка недоступна.')
 
-        if me.blocked_users.filter(pk=following_profile.user_id).exists() or following_profile.blocked_users.filter(
-                pk=me.user_id).exists():
-            raise serializers.ValidationError({'following': 'Подписка недоступна.'})
+        if me == following:
+            raise serializers.ValidationError('Нельзя подписаться на самого себя.')
 
-        matching_subscription = Subscription.objects.filter(
-            following=following_profile.user,
-            follower=validated_data['user'],
-        )
-        if matching_subscription.exists():
-            raise serializers.ValidationError({'following': 'Подписка уже существует.'})
+        queryset = Subscription.objects.filter(following=following, follower=me)
+        if queryset.exists():
+            pending_queryset = queryset.filter(subscription_status='PENDING')
+            if pending_queryset.exists():
+                raise serializers.ValidationError('Подписка уже в ожидании.')
 
+            accepted_queryset = queryset.filter(subscription_status='ACCEPTED')
+            if accepted_queryset.exists():
+                raise serializers.ValidationError('Подписка уже существует.')
+        subscription_status = 'PENDING' if following.profile.is_private else 'ACCEPTED'
         subscription = Subscription.objects.create(
-            following=following_profile.user,
+            following=following,
             follower=validated_data['user'],
-            is_accepted=not following_profile.is_private,
+            subscription_status=subscription_status
         )
         return subscription
 
 
     def update(self, instance, validated_data):
-        if 'is_accepted' in validated_data:
-            if validated_data['is_accepted']:
-                instance.following = validated_data.get('is_accepted', instance.is_accepted)
-                return instance
-            instance.is_accepted = False
-            instance.delete()
-            return instance
-        return serializers.ValidationError('можно только принимать или отклонить запрос')
+        if 'subscription_status' not in validated_data:
+            raise serializers.ValidationError('Доступно только изменение статуса подписки.')
+        if  validated_data['subscription_status'] == 'PENDING':
+            raise serializers.ValidationError('Нельзя назначить такой статус подписки.')
+        if instance.subscription_status != 'PENDING':
+            raise serializers.ValidationError('Нельзя изменить статус подписки.')
+        instance.subscription_status = validated_data['subscription_status']
+        instance.save()
+
 
 
 

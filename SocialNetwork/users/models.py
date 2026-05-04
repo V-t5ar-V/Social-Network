@@ -23,8 +23,11 @@ class Profile(models.Model):
 
 class Subscription(models.Model):
     following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
-    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
-    is_accepted = models.BooleanField(default=False)
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+    subscription_status_choices = (('PENDING', 'pending'), ('ACCEPTED', 'accepted'), ('REJECTED', 'rejected'))
+    subscription_status = models.CharField(max_length=10, choices=subscription_status_choices)
     created_at = models.DateTimeField(auto_now_add=True)
-    class Meta:
-        unique_together = ('following', 'follower')
+    # class Meta:
+    #     unique_together = ('following', 'follower')
+    def __str__(self):
+        return f'{self.pk}, following - {self.following}, follower - {self.follower}, is_accepted - {self.is_accepted}'

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Post, Media, Tag, Comment, Like, Post_View
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class MediaSerializer(serializers.ModelSerializer):
@@ -24,6 +25,10 @@ class PostSerializer(serializers.Serializer):
     class Meta:
         model = Post
         fields = ['title', 'user', 'created_at', 'description', 'tags', 'slug']
+
+
+
+
 
     def to_representation(self, instance):
         request = self.context.get('request')
@@ -105,5 +110,24 @@ class PostSerializer(serializers.Serializer):
         return post
 
 
+
+class CommentSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    text = serializers.CharField(max_length=200)
+    created_at = serializers.DateTimeField(default=timezone.now, read_only=True)
+    parent = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False)
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'text', 'user', 'created_at', 'parent', 'post']
+
+    def create(self, validated_data):
+        parent = validated_data.get('parent', None)
+        if parent:
+            if parent.post != validated_data['post']:
+                raise serializers.ValidationError('Нельзя писать под постом дочерний комментарий, который написан под другим постом.')
+        comment = Comment.objects.create(**validated_data)
+        return comment
 
 

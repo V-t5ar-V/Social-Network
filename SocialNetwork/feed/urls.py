@@ -1,13 +1,18 @@
 from django.urls import path
-from .views import PostViewSet
+from .views import PostViewSet, CommentViewSet
 urlpatterns = [
     path('posts/',PostViewSet.as_view({
         'post': 'create',
-        # 'get': 'list',
+        'get': 'list',
     }), name='posts'),
 #     path('posts/<slug:slug>', noview, name='posts_detail'),
-#     path('posts/<slug:slug>/comments/', noview, name='comments_list'),
-#     path('comments/<int:pk>/', noview, name='comments'),
+    path('posts/<slug:slug>/comments/', CommentViewSet.as_view({
+        'post': 'create',
+        'get': 'list',
+    }), name='comments_list'),
+    path('comments/<int:pk>/', CommentViewSet.as_view({
+        "delete": "destroy",
+    }), name='comments'),
 #     path('posts/<slug:slug>/likes/', noview, name='likes'),
 #     path('likes/<int:pk>', noview, name='delete_like'),
 #     path('posts/<slug:slug>/views/', noview, name='number_of_views'),
