@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.utils import timezone
+
 # Create your models here.
 
 class Profile(models.Model):
@@ -27,7 +29,8 @@ class Subscription(models.Model):
     subscription_status_choices = (('PENDING', 'pending'), ('ACCEPTED', 'accepted'), ('REJECTED', 'rejected'))
     subscription_status = models.CharField(max_length=10, choices=subscription_status_choices)
     created_at = models.DateTimeField(auto_now_add=True)
-    # class Meta:
-    #     unique_together = ('following', 'follower')
+    sent_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('following', 'follower')
     def __str__(self):
-        return f'{self.pk}, following - {self.following}, follower - {self.follower}, is_accepted - {self.subscription_status}'
+        return f'{self.pk}, following - {self.following.pk}~{self.following}, follower - {self.follower.pk}~{self.follower}, is_accepted - {self.subscription_status}'

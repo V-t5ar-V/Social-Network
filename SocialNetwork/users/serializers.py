@@ -1,17 +1,27 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile, Subscription
+from django.utils import timezone
 
 class SubscriptionSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     follower = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     subscription_status = serializers.ChoiceField(choices=['PENDING', 'ACCEPTED', 'REJECTED'], required=False)
-    created_at = serializers.DateTimeField(read_only=True)
-
+    created_at = serializers.HiddenField(default=timezone.now())
+    sent_at = serializers.HiddenField(default=timezone.now())
     class Meta:
         model = Subscription
-        fields = ('id, following', 'follower', 'subscription_status', 'created_at')
+        fields = ('id', 'following', 'follower', 'subscription_status', 'created_at', 'sent_at')
+
+    def to_representation(self, instance):
+        data = {
+            'id': instance.pk,
+            'following': instance.following.username,
+            'follower': instance.follower.username,
+            'subscription_status': instance.subscription_status,
+        }
+        return data
 
     def create(self, validated_data):
         me = validated_data['user']
@@ -25,13 +35,16 @@ class SubscriptionSerializer(serializers.Serializer):
 
         queryset = Subscription.objects.filter(following=following, follower=me)
         if queryset.exists():
-            pending_queryset = queryset.filter(subscription_status='PENDING')
-            if pending_queryset.exists():
-                raise serializers.ValidationError('Подписка уже в ожидании.')
+            subscription = queryset.first()
+            if subscription.subscription_status == 'PENDING':
+                raise serializers.ValidationError('Подписка уже в ожидании')
+            elif subscription.subscription_status == 'ACCEPTED':
+                raise serializers.ValidationError('Подписка уже принята')
+            subscription.sent_at = timezone.now()
+            subscription.subscription_status = 'PENDING'
+            subscription.save()
+            return subscription
 
-            accepted_queryset = queryset.filter(subscription_status='ACCEPTED')
-            if accepted_queryset.exists():
-                raise serializers.ValidationError('Подписка уже существует.')
         subscription_status = 'PENDING' if following.profile.is_private else 'ACCEPTED'
         subscription = Subscription.objects.create(
             following=following,

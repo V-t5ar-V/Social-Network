@@ -32,42 +32,58 @@ class SubscriptionViewSet(viewsets.ViewSet):
     def get_following(self, request, slug=None): #########################
         user = get_object_or_404(User.objects.all(), username=slug)
         profile = user.profile
-        print(user)
+
         if user != request.user:
             if profile.is_private and request.user not in profile.user.following.all():
                 return Response({'title': 'Только подписчики могу посмотреть список подписок.'},
                                 status=status.HTTP_403_FORBIDDEN)
-        queryset = Subscription.objects.filter(follower=user, subscription_status='ACCEPTED')
+
+        queryset = Subscription.objects.filter(follower=user, subscription_status='ACCEPTED').order_by('-created_at')
+
         if not queryset.exists():
             return Response({'title': 'Нет подписок.'}, status=status.HTTP_204_NO_CONTENT)
+
         serializer = self.serializer_class(queryset, many=True)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     @action(methods=['get'], detail=False)
     def get_followers(self, request, slug=None):
-        profile_queryset = Profile.objects.all()
-        profile = get_object_or_404(profile_queryset, slug=slug)
-        if profile.is_private and request.user not in profile.user.following.all():
-            return Response({'title': 'Только подписчики могут посмотреть список подписчиков.'}, status=status.HTTP_403_FORBIDDEN)
-        user = profile.user
-        queryset = Subscription.objects.filter(following=user, subscription_status='ACCEPTED')
+        user = get_object_or_404(User.objects.all(), username=slug)
+        profile = user.profile
+
+        if user != request.user:
+            if profile.is_private and request.user not in profile.user.following.all():
+                return Response({'title': 'Только подписчики могу посмотреть список подписок.'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+        queryset = Subscription.objects.filter(following=user, subscription_status='ACCEPTED').order_by('-created_at')
+
         if not queryset.exists():
-            return Response({'title': 'Нет подписчиков.'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'title': 'Нет подписок.'}, status=status.HTTP_204_NO_CONTENT)
+
         serializer = self.serializer_class(queryset, many=True)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, slug=None):
-        queryset = User.objects.all()
-        following_obj = get_object_or_404(queryset, username=slug)
-        request.data['following'] = following_obj.pk
+        profile_queryset = Profile.objects.all()
+        profile = get_object_or_404(profile_queryset, slug=slug)
 
-        user = request.user
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save(user=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if profile.is_private and request.user not in profile.user.following.all():
+            return Response({'title': 'Только подписчики могут посмотреть список подписчиков.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        user = profile.user
+        queryset = Subscription.objects.filter(following=user, subscription_status='ACCEPTED')
+
+        if not queryset.exists():
+            return Response({'title': 'Нет подписчиков.'}, status=status.HTTP_204_NO_CONTENT)
+
+        serializer = self.serializer_class(queryset, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True)
     def accept(self, request, pk=None):
