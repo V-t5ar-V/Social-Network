@@ -4,7 +4,10 @@
     <list default="true" id="3d05896e-5039-42d9-a1d6-18d2530faacd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/views.py" afterDir="false" />
     </list>

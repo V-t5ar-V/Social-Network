@@ -2,10 +2,9 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import get_object_or_404
-from django.utils.text import slugify
 
 from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -98,3 +97,33 @@ class CommentViewSet(viewsets.ViewSet):
             return Response({'title': 'нельзя удалить чужой комментарии'}, status=status.HTTP_403_FORBIDDEN)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LikeViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = LikeSerializer
+
+    def create(self, request, slug=None):
+        post = get_object_or_404(Post, slug=slug)
+        user = request.user
+
+        serializer = self.serializer_class(data={
+            'post': post.pk,
+        },
+            context={'request': request}
+        )
+
+
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(user=user)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, slug=None):
+        post = get_object_or_404(Post, slug=slug)
+        like = post.likes.all().filter(user=request.user)
+        if like.exists():
+            like.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'title': 'Вы не ставили лайка посту'}, status=status.HTTP_404_NOT_FOUND)
+

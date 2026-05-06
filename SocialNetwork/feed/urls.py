@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import PostViewSet, CommentViewSet
+from .views import PostViewSet, CommentViewSet, LikeViewSet
+
 urlpatterns = [
     path('posts/',PostViewSet.as_view({
         'post': 'create',
@@ -13,6 +14,12 @@ urlpatterns = [
     path('comments/<int:pk>/', CommentViewSet.as_view({
         "delete": "destroy",
     }), name='comments'),
+    path('posts/<slug:slug>/like/', LikeViewSet.as_view({
+        'post': 'create',
+    })),
+    path('posts/<slug:slug>/delete_like/', LikeViewSet.as_view({
+        'delete': 'destroy',
+    }))
 #     path('posts/<slug:slug>/likes/', noview, name='likes'),
 #     path('likes/<int:pk>', noview, name='delete_like'),
 #     path('posts/<slug:slug>/views/', noview, name='number_of_views'),

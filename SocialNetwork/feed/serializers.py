@@ -46,6 +46,8 @@ class PostSerializer(serializers.Serializer):
             'tags': [tag.tag for tag in instance.tags.all()],
             'slug': instance.slug,
             'media': media_files,
+            'likes': instance.likes.count(),
+            'comments': instance.comments.count(),
         }
 
     def validate_video(self, value):
@@ -129,5 +131,40 @@ class CommentSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Нельзя писать под постом дочерний комментарий, который написан под другим постом.')
         comment = Comment.objects.create(**validated_data)
         return comment
+
+class LikeSerializer(serializers.Serializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+    created_at = serializers.DateTimeField(default=timezone.now, read_only=True)
+
+    class Meta:
+        model = Like
+        fields = ['id', 'user', 'created_at', 'post']
+
+    def to_representation(self, instance):
+        data = {
+            'slug': instance.post.slug,
+        }
+        return data
+
+    def validate_like(self, user, post):
+        queryset = Like.objects.filter(user=user, post=post)
+        post_user = post.user
+
+        if queryset.exists():
+            raise serializers.ValidationError('Лайк уже существует.')
+        if user != post_user:
+            if user in post_user.profile.blocked_users.all():
+                raise serializers.ValidationError('Лайк недоступен.')
+            if post_user.profile.is_private and user not in post_user.followers.all():
+                raise serializers.ValidationError('Только подписчики могут создать лайк.')
+
+        return True
+
+    def create(self, validated_data):
+        self.validate_like(validated_data['user'], validated_data['post'])
+        like = Like.objects.create(**validated_data)
+        return like
+
 
 

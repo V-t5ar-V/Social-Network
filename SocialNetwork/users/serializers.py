@@ -1,3 +1,4 @@
+from django.template.context_processors import request
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile, Subscription
@@ -88,6 +89,37 @@ class ProfileSerializer(serializers.Serializer):                                
         fields = ('id', 'user','is_private', 'blocked_users', 'bio', 'profile_pic', 'is_online', 'slug', 'name')
 
 
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        blocked_users = []
+        for blocked_user in instance.blocked_users.all():
+            blocked_users.append(blocked_user.username)
+        pfp = instance.profile_pic.url if instance.profile_pic else None
+        pfp_ulr = request.build_absolute_uri(pfp) if pfp else None
+        data = {
+            'username': instance.slug,
+            'is_private': instance.is_private,
+            'blocked_users': blocked_users,
+            'bio': instance.bio,
+            'profile_pic': pfp_ulr,
+            'name': instance.name,
+        }
+        print(data)
+        return data
+
+    def validate_profile_pic(self, pic):
+        pfp_max_size = 5 * 1024 * 1024
+        allowed_types = ['image/png', 'image/jpeg']
+
+
+        if pic.content_type not in allowed_types:
+            raise serializers.ValidationError('Недопустимый тип меди, разрешены только png и jpg.')
+
+        if pic.size > pfp_max_size:
+            raise serializers.ValidationError('Слишком большое изображение (> 5 Мб).')
+
+        pass
+
     def create(self, validated_data):
         blocked_users = validated_data.pop('blocked_users', [])
         profile = Profile.objects.create(
@@ -111,8 +143,11 @@ class ProfileSerializer(serializers.Serializer):                                
             user = instance.user
             user.username = username
             user.save()
+
+
         for field, value in validated_data.items():
             setattr(instance, field, value)
+
 
         instance.save()
 

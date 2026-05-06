@@ -101,7 +101,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
         queryset = Subscription.objects.all()
         subscription = get_object_or_404(queryset, pk=pk)
         if request.user != subscription.following:
-            return Response({'title': 'отклонить запрос можно только получатель запроса'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'title': 'Отклонить запрос можно только получатель запроса.'}, status=status.HTTP_403_FORBIDDEN)
         serializer = self.serializer_class(subscription, data={'subscription_status': 'REJECTED'}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -184,6 +184,13 @@ class ProfileViewSet(viewsets.ViewSet):
         )
         if serializer.is_valid():
             serializer.save()
+            following_queryset = Subscription.objects.filter(following=blocked_user, follower=request.user)
+            follower_queryset = Subscription.objects.filter(following=request.user, follower=blocked_user)
+            if follower_queryset.exists():
+                follower_queryset.first().delete()
+            if following_queryset.exists():
+                following_queryset.first().delete()
+
             return Response({"title": "Пользователь заблокирован."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

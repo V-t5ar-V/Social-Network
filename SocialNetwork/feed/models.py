@@ -1,4 +1,6 @@
 import random, string
+from asyncio.windows_events import NULL
+
 from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
@@ -46,11 +48,12 @@ class Comment(models.Model):
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey('Post', on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('user', 'post')
 
 class Post_View(models.Model):
     viewer = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, default=NULL)
     created_at = models.DateTimeField(auto_now_add=True)
