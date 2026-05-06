@@ -39,7 +39,7 @@ class PostSerializer(serializers.Serializer):
                 file_url = request.build_absolute_uri(file_url)
             media_files.append(file_url)
 
-        return {
+        data = {
             'title': instance.title,
             'created_at': instance.created_at,
             'description': instance.description,
@@ -49,6 +49,7 @@ class PostSerializer(serializers.Serializer):
             'likes': instance.likes.count(),
             'comments': instance.comments.count(),
         }
+        return data
 
     def validate_video(self, value):
         max_video_size = 150 * 1024 * 1024
