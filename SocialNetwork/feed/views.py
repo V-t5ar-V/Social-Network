@@ -18,9 +18,9 @@ class PostViewSet(viewsets.ViewSet):
         page = paginator.paginate_queryset(queryset, request, view=self)
 
         if page is not None:
-            serializer = PostSerializer(page, many=True)
+            serializer = PostSerializer(page, many=True, context={'request': request})
             return paginator.get_paginated_response(serializer.data)
-        serializer = PostSerializer(queryset, many=True)
+        serializer = PostSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
         # if queryset:
         #     serializer = self.serializer_class(queryset, many=True, context={'request': request})

@@ -11,9 +11,6 @@ urlpatterns = [
     path('edit_user/', UserViewSet.as_view({
         'patch': 'partial_update',
     })),
-    path('check-username/<slug:slug>', UserViewSet.as_view({
-        'get': 'check_username',
-    }), name='check_username'),
 
 
     path('profiles/edit_my_profile/', ProfileViewSet.as_view({
@@ -21,8 +18,10 @@ urlpatterns = [
     })),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
         'get': 'retrieve',
-        'delete': 'destroy',
     }) ,name='profile'),
+    path('profiles/delete-me/', ProfileViewSet.as_view({
+        'delete': 'destroy',
+    })),
 
     path('profiles/detail/<slug:slug>/following/', SubscriptionViewSet.as_view({
         'get': 'get_following',
@@ -50,7 +49,7 @@ urlpatterns = [
         'patch': 'reject'
     }), name='reject_subscription'),
 
-    path('subscriptions/action/<int:pk>/', SubscriptionViewSet.as_view({
+    path('subscriptions/action/<int:pk>/delete/', SubscriptionViewSet.as_view({
         'delete': 'destroy'
     }), name='delete_subscription'),
 

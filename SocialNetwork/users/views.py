@@ -14,14 +14,14 @@ class SubscriptionViewSet(viewsets.ViewSet):
     serializer_class = SubscriptionSerializer
 
     def get_follower_requests(self, request):
-        queryset = Subscription.objects.filter(following=request.user, subscription_status='PENDING')
+        queryset = Subscription.objects.filter(following=request.user, subscription_status='PENDING').order_by('-sent_at')
         if not queryset.exists():
             return Response(data={'title':'Вы не получали запросов на подписку'}, status=status.HTTP_204_NO_CONTENT)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def got_following_requests(self,request):
-        queryset = Subscription.objects.filter(follower=request.user, subscription_status='PENDING')
+        queryset = Subscription.objects.filter(follower=request.user, subscription_status='PENDING').order_by('-sent_at')
         if queryset.exists():
             serializer = self.serializer_class(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -36,6 +36,9 @@ class SubscriptionViewSet(viewsets.ViewSet):
         if user != request.user:
             if profile.is_private and request.user not in profile.user.following.all():
                 return Response({'title': 'Только подписчики могу посмотреть список подписок.'},
+                                status=status.HTTP_403_FORBIDDEN)
+            if request.user in profile.blocked_users.all():
+                return Response({'title': 'Просмотр списка подписчиков недоступен.'},
                                 status=status.HTTP_403_FORBIDDEN)
 
         queryset = Subscription.objects.filter(follower=user, subscription_status='ACCEPTED').order_by('-created_at')
@@ -68,21 +71,16 @@ class SubscriptionViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, slug=None):
-        profile_queryset = Profile.objects.all()
-        profile = get_object_or_404(profile_queryset, slug=slug)
-
-        if profile.is_private and request.user not in profile.user.following.all():
-            return Response({'title': 'Только подписчики могут посмотреть список подписчиков.'},
-                            status=status.HTTP_403_FORBIDDEN)
-
-        user = profile.user
-        queryset = Subscription.objects.filter(following=user, subscription_status='ACCEPTED')
-
-        if not queryset.exists():
-            return Response({'title': 'Нет подписчиков.'}, status=status.HTTP_204_NO_CONTENT)
-
-        serializer = self.serializer_class(queryset, many=True)
-
+        following = get_object_or_404(User, username=slug)
+        serializer = self.serializer_class(data=
+                                                {'following': following.pk,
+                                                 'follower': request.user.pk
+                                                 },
+                                           context=
+                                                {'request': request}
+                                           )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True)
@@ -105,7 +103,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(subscription, data={'subscription_status': 'REJECTED'}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({'title': 'успешно отклонено'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'title': 'успешно отклонено'}, status=status.HTTP_200_OK)
 
     def destroy(self, request, pk=None):
         queryset = Subscription.objects.all()
@@ -135,10 +133,10 @@ class ProfileViewSet(viewsets.ViewSet):
         if request.user != user:
             if user.profile.is_private and request.user not in user.followers.filter(subscription_status='ACCEPTED'):
                 return Response({'title': 'Профиль приватный.'}, status=status.HTTP_403_FORBIDDEN) ##################
+        if request.user in user.profile.blocked_users.all():
+            return Response({'title':'Профиль недоступен'}, status=status.HTTP_403_FORBIDDEN)
         serializer = self.serializer_class(user.profile, context={'request': request})
         data = dict(serializer.data)
-        if request.user != user:
-            del data['blocked_users']
         return Response(data=data, status=status.HTTP_200_OK)
 
     def partial_update(self, request):
@@ -151,17 +149,12 @@ class ProfileViewSet(viewsets.ViewSet):
 
             partial=True
         )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def destroy(self, request, slug=None):
-        queryset = Profile.objects.all()
-        profile = get_object_or_404(queryset, slug=slug)
-        if profile.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        user = profile.user
+    def destroy(self, request):
+        user = request.user
         user.delete()
         return Response({"title": "Учетная запись удалена."}, status=status.HTTP_204_NO_CONTENT)
 
@@ -182,17 +175,17 @@ class ProfileViewSet(viewsets.ViewSet):
             context={'request': request},
             partial=True
         )
-        if serializer.is_valid():
-            serializer.save()
-            following_queryset = Subscription.objects.filter(following=blocked_user, follower=request.user)
-            follower_queryset = Subscription.objects.filter(following=request.user, follower=blocked_user)
-            if follower_queryset.exists():
-                follower_queryset.first().delete()
-            if following_queryset.exists():
-                following_queryset.first().delete()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        following_queryset = Subscription.objects.filter(following=blocked_user, follower=request.user)
+        follower_queryset = Subscription.objects.filter(following=request.user, follower=blocked_user)
+        if follower_queryset.exists():
+            follower_queryset.first().delete()
+        if following_queryset.exists():
+            following_queryset.first().delete()
 
-            return Response({"title": "Пользователь заблокирован."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"title": "Пользователь заблокирован."}, status=status.HTTP_200_OK)
+
 
     @action(methods=['patch'], detail=True)
     def unblock_user(self, request, slug=None):
@@ -208,10 +201,9 @@ class ProfileViewSet(viewsets.ViewSet):
             context={'request': request},
             partial=True
         )
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"title": "Пользователь разблокирован."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"title": "Пользователь разблокирован."}, status=status.HTTP_200_OK)
 
 
 class PostAllowAny(permissions.BasePermission):
@@ -227,30 +219,13 @@ class UserViewSet(viewsets.ViewSet):
 
     def create(self, request):
         serializer = UserSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request):
         user = request.user
         serializer = UserSerializer(user, data=request.data, context={'request': request}, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(methods=['get'], detail=True)
-    def check_username(self, request, slug=None):
-        username = slug
-        username_exists = User.objects.filter(username=username).exists()
-        if username_exists:
-            return Response({'is_free': False}, status=status.HTTP_200_OK)
-        return Response({'is_free': True}, status=status.HTTP_200_OK)
-
-
-
-
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

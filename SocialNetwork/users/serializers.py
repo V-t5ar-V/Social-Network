@@ -1,4 +1,3 @@
-from django.template.context_processors import request
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile, Subscription
@@ -22,37 +21,62 @@ class SubscriptionSerializer(serializers.Serializer):
             'follower': instance.follower.username,
             'subscription_status': instance.subscription_status,
         }
+
         return data
 
-    def create(self, validated_data):
-        me = validated_data['user']
-        following = validated_data['following']
+    def validate_subscription(self, following, follower):
 
-        if me in following.profile.blocked_users.all():
-            raise serializers.ValidationError('Подписка недоступна.')
+        if following == follower:
+            raise serializers.ValidationError({'following': 'Нельзя подписаться на самого себя.'})
 
-        if me == following:
-            raise serializers.ValidationError('Нельзя подписаться на самого себя.')
+        if follower in following.profile.blocked_users.all():
+            raise serializers.ValidationError({'title': 'Подписка недоступна.'})
 
-        queryset = Subscription.objects.filter(following=following, follower=me)
+
+        queryset = Subscription.objects.filter(following=following, follower=follower)
+
         if queryset.exists():
+
             subscription = queryset.first()
+
             if subscription.subscription_status == 'PENDING':
                 raise serializers.ValidationError('Подписка уже в ожидании')
+
             elif subscription.subscription_status == 'ACCEPTED':
                 raise serializers.ValidationError('Подписка уже принята')
-            subscription.sent_at = timezone.now()
-            subscription.subscription_status = 'PENDING'
-            subscription.save()
+
             return subscription
 
-        subscription_status = 'PENDING' if following.profile.is_private else 'ACCEPTED'
+        return None
+
+    def create(self, validated_data):
+        follower = validated_data['follower']
+        following = validated_data['following']
+
+        subscription = self.validate_subscription(following=following, follower=follower)
+
+        updated_status = 'PENDING' if following.profile.is_private else 'ACCEPTED'
+
+        if subscription:
+
+            subscription.sent_at = timezone.now()
+            subscription.subscription_status = updated_status
+            subscription.save()
+
+            return subscription
+
+
+
         subscription = Subscription.objects.create(
             following=following,
-            follower=validated_data['user'],
-            subscription_status=subscription_status
+            follower=follower,
+            subscription_status=updated_status
         )
+
         return subscription
+
+
+
 
 
     def update(self, instance, validated_data):
@@ -64,6 +88,7 @@ class SubscriptionSerializer(serializers.Serializer):
             raise serializers.ValidationError('Нельзя изменить статус подписки.')
         instance.subscription_status = validated_data['subscription_status']
         instance.save()
+        return instance
 
 
 
@@ -71,7 +96,6 @@ class SubscriptionSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.Serializer):                                            #UNSTABLE
-    username = serializers.SlugField(max_length=30, required=False)
     id = serializers.IntegerField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
     is_private = serializers.BooleanField(default=False, allow_null=True)
@@ -94,17 +118,18 @@ class ProfileSerializer(serializers.Serializer):                                
         blocked_users = []
         for blocked_user in instance.blocked_users.all():
             blocked_users.append(blocked_user.username)
+
         pfp = instance.profile_pic.url if instance.profile_pic else None
         pfp_ulr = request.build_absolute_uri(pfp) if pfp else None
         data = {
             'username': instance.slug,
             'is_private': instance.is_private,
-            'blocked_users': blocked_users,
             'bio': instance.bio,
             'profile_pic': pfp_ulr,
             'name': instance.name,
         }
-        print(data)
+        if request.user == instance.user:
+            data['blocked_users'] = blocked_users if request.user == instance.user else None
         return data
 
     def validate_profile_pic(self, pic):
@@ -133,16 +158,23 @@ class ProfileSerializer(serializers.Serializer):                                
             profile.blocked_users.set(blocked_users)
         return profile
 
+    def update_blacklist(self, instance, target, act):
+        if target == instance.user:
+            raise serializers.ValidationError({'target_user': 'Нельзя заблокировать самого себя.'})
+        if act == 'block' and target:
+            if target in instance.blocked_users.all():
+                raise serializers.ValidationError({'target_user': 'Пользователь уже заблокирован.'})
+            instance.blocked_users.add(target)
+        elif act == 'unblock' and target:
+            if target not in instance.blocked_users.all():
+                raise serializers.ValidationError({'target_user': 'Пользователь вне списка заблокированных'})
+            instance.blocked_users.remove(target)
+
     def update(self, instance, validated_data):
         validated_data.pop('is_online', None)
         validated_data.pop('blocked_users', None)
-        username = validated_data.pop('username', None)
         target = validated_data.pop('target_user', None)
         act = validated_data.pop('action', None)
-        if username:
-            user = instance.user
-            user.username = username
-            user.save()
 
 
         for field, value in validated_data.items():
@@ -150,27 +182,34 @@ class ProfileSerializer(serializers.Serializer):                                
 
 
         instance.save()
-
-        if act == 'block' and target:
-            if target == instance.user:
-                raise serializers.ValidationError({'target_user': 'Нельзя заблокировать самого себя.'})
-            instance.blocked_users.add(target)
-        elif act == 'unblock' and target:
-            instance.blocked_users.remove(target)
-
+        if target and act:
+            self.update_blacklist(instance=instance,
+                                  target=target,
+                                  act=act)
 
         return instance
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=8, max_length=20)
     profile = ProfileSerializer(required=False)
+    email = serializers.EmailField(write_only=True)
     class Meta:
         model = User
         fields = ('username', 'password', 'email', 'profile')
 
+    def validate_values(self, validated_data):
+        email = validated_data.get('email', None)
+        username = validated_data.get('username', None)
+        if email:
+            email_exists = User.objects.filter(email=email).exists()
+            if email_exists:
+                raise serializers.ValidationError({'email': 'Пользователь с такой почтой уже существует.'})
+
+
     def create(self, validated_data):                                                           # UNSTABLE
         profile_data = validated_data.pop('profile')
+        self.validate_values(validated_data)
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -180,6 +219,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        self.validate_values(validated_data)
         username = validated_data.pop('username', None)
         email = validated_data.pop('email', None)
         if username:
