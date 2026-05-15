@@ -13,7 +13,7 @@ urlpatterns = [
     })),
 
 
-    path('profiles/edit_my_profile/', ProfileViewSet.as_view({
+    path('profiles/edit_profile/', ProfileViewSet.as_view({
         'patch': 'partial_update',
     })),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
@@ -42,22 +42,22 @@ urlpatterns = [
         'post': 'create',
     }), name='create_subscription'),
 
-    path('subscriptions/action/<int:pk>/accept/', SubscriptionViewSet.as_view({
+    path('subscriptions/<int:pk>/accept/', SubscriptionViewSet.as_view({
         'patch': 'accept'
     }), name='accept_subscription'),
-    path('subscriptions/action/<int:pk>/reject/', SubscriptionViewSet.as_view({
+    path('subscriptions/<int:pk>/reject/', SubscriptionViewSet.as_view({
         'patch': 'reject'
     }), name='reject_subscription'),
 
-    path('subscriptions/action/<int:pk>/delete/', SubscriptionViewSet.as_view({
+    path('subscriptions/<int:pk>/delete/', SubscriptionViewSet.as_view({
         'delete': 'destroy'
     }), name='delete_subscription'),
 
 
-    path('blacklist/add/<slug:slug>/', ProfileViewSet.as_view({
+    path('profiles/<slug:slug>/block/', ProfileViewSet.as_view({
         'patch': 'block_user',
     }), name='block_user'),
-    path('blacklist/remove/<slug:slug>/', ProfileViewSet.as_view({
+    path('profiles/<slug:slug>/unblock/', ProfileViewSet.as_view({
         'patch': 'unblock_user',
     }), name='unblock_user'),
 

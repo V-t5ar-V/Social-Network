@@ -3,7 +3,8 @@ from .serializers import UserSerializer, ProfileSerializer, SubscriptionSerializ
 from rest_framework.response import Response
 from .models import Profile, Subscription
 from rest_framework.generics import get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from rest_framework.decorators import action
 
 
@@ -131,7 +132,7 @@ class ProfileViewSet(viewsets.ViewSet):
         user_queryset = User.objects.all()
         user = get_object_or_404(user_queryset, username=slug)
         if request.user != user:
-            if user.profile.is_private and request.user not in user.followers.filter(subscription_status='ACCEPTED'):
+            if user.profile.is_private and request.user not in user.followers.all():
                 return Response({'title': 'Профиль приватный.'}, status=status.HTTP_403_FORBIDDEN) ##################
         if request.user in user.profile.blocked_users.all():
             return Response({'title':'Профиль недоступен'}, status=status.HTTP_403_FORBIDDEN)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from .models import Profile, Subscription
 from django.utils import timezone
 
@@ -224,6 +225,8 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data.pop('email', None)
         if username:
             instance.username = username
+            instance.profile.slug = username
+            instance.profile.save()
         if email:
             instance.email = email
         instance.save()

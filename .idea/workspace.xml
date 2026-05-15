@@ -4,8 +4,24 @@
     <list default="true" id="3d05896e-5039-42d9-a1d6-18d2530faacd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/SocialNetwork/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/SocialNetwork/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/chat/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/chat/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/chat/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/chat/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0002_alter_comment_post.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/migrations/0003_post_view_post_alter_like_post.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/feed/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/feed/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0002_alter_subscription_is_accepted.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0003_alter_subscription_unique_together.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0004_rename_is_accepted_subscription_subscription_status.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0005_alter_subscription_follower.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/migrations/0006_subscription_sent_at_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SocialNetwork/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SocialNetwork/users/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/SocialNetwork/users/views.py" afterDir="false" />
@@ -36,24 +52,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.test.executor": "Run",
-    "Python.test2.executor": "Run",
-    "Python.test3.executor": "Run",
-    "Python.views.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/user/Desktop/Social-Network",
-    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.views.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/Desktop/Social-Network&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -104,12 +120,17 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/SocialNetwork/users/models.py</url>
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/SocialNetwork/users/urls.py</url>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/SocialNetwork/users/urls.py</url>
-          <option name="timeStamp" value="3" />
+          <line>7</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/SocialNetwork/feed/models.py</url>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

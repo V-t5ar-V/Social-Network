@@ -143,9 +143,12 @@ class LikeSerializer(serializers.Serializer):
         fields = ['id', 'user', 'created_at', 'post']
 
     def to_representation(self, instance):
+
         data = {
             'slug': instance.post.slug,
+            'like_id': instance.pk
         }
+
         return data
 
     def validate_like(self, user, post):
@@ -154,9 +157,12 @@ class LikeSerializer(serializers.Serializer):
 
         if queryset.exists():
             raise serializers.ValidationError('Лайк уже существует.')
+
         if user != post_user:
+
             if user in post_user.profile.blocked_users.all():
                 raise serializers.ValidationError('Лайк недоступен.')
+
             if post_user.profile.is_private and user not in post_user.followers.all():
                 raise serializers.ValidationError('Только подписчики могут создать лайк.')
 
