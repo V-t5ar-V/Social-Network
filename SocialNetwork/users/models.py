@@ -36,10 +36,10 @@ class Subscription(models.Model):
 class User(AbstractUser):
     @property
     def followers(self):
-        return Subscription.objects.filter(following=self, subscription_status='ACCEPTED')
+        return self.followers.filter(subscription_status='ACCEPTED')
     @property
     def following(self):
-        return Subscription.objects.filter(follower=self, subscription_status='ACCEPTED')
+        return self.following.filter(subscription_status='ACCEPTED')
 
     groups = models.ManyToManyField(
         'auth.Group',

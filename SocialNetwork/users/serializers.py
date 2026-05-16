@@ -209,7 +209,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):                                                           # UNSTABLE
-        profile_data = validated_data.pop('profile')
+        profile_data = validated_data.pop('profile', None)
+        if profile_data is None:
+            profile_data = {'name': 'NoNameUser'}
         self.validate_values(validated_data)
         user = User.objects.create_user(
             username=validated_data['username'],
