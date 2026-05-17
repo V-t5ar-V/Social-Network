@@ -38,13 +38,13 @@ class PostViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, slug=None):
         post = get_object_or_404(Post, slug=slug)
-
+        user = request.user
         if post.user != request.user:
             post_profile = post.user.profile
             if request.user in post_profile.blocked_users.all():
                 return Response({'title': 'Просмотр недоступен'}, status=status.HTTP_403_FORBIDDEN)
             elif post_profile.is_private:
-                if request.user not in post_profile.user.followers.all():
+                if not post.user.followers.filter(follower=user, subscription_status='ACCEPTED').exists():
                     return Response({'title': 'Профиль приватный'}, status=status.HTTP_403_FORBIDDEN)
         serializer = self.serializer_class(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -54,14 +54,13 @@ class PostViewSet(viewsets.ViewSet):
 
     @action(methods=['list'], detail=True)
     def comments(self, request, slug=None):
-        queryset = Post.objects.all()
-        post = get_object_or_404(queryset, slug=slug)
+        post = get_object_or_404(Post, slug=slug)
         profile = post.user.profile
         user = request.user
-
-        if profile.is_private:
-            if user not in post.user.followers.all():
-                return Response({'title':'Доступ запрещен.'}, status=status.HTTP_403_FORBIDDEN)
+        if user != post.user:
+            if profile.is_private:
+                if not post.user.followers.filter(follower=user, subscription_status='ACCEPTED').exists():
+                    return Response({'title':'Доступ запрещен.'}, status=status.HTTP_403_FORBIDDEN)
 
         if user in profile.blocked_users.all():
             return Response({'title':'Доступ запрещен.'}, status=status.HTTP_403_FORBIDDEN)
@@ -74,8 +73,7 @@ class PostViewSet(viewsets.ViewSet):
 
     @action(methods=['post'], detail=True)
     def to_comment(self, request, slug=None):
-        queryset = Post.objects.all()
-        post = get_object_or_404(queryset, slug=slug)
+        post = get_object_or_404(Post, slug=slug)
         post_user = post.user
         request.data['post'] = post.pk
 
@@ -86,7 +84,7 @@ class PostViewSet(viewsets.ViewSet):
                 return Response({'title': 'Вы не можете прокомментировать пост.'}, status=status.HTTP_403_FORBIDDEN)
 
             if post_user.profile.is_private:
-                if user not in post_user.followers.all():
+                if not post.user.followers.filter(follower=user, subscription_status='ACCEPTED').exists():
                     return Response({'title': 'Только подписчики могут комментировать'}, status=status.HTTP_403_FORBIDDEN)
 
 
@@ -96,10 +94,18 @@ class PostViewSet(viewsets.ViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
     @action(methods=['create'], detail=True)
     def like(self, request, slug=None):
         post = get_object_or_404(Post, slug=slug)
         user = request.user
+        profile = post.user.profile
+        if user != post.user:
+            if profile.is_private:
+                if not post.user.followers.filter(follower=user, subscription_status='ACCEPTED').exists():
+                    return Response({'title': 'Лельзя поставить лайк.'}, status=status.HTTP_403_FORBIDDEN)
+        if user in profile.blocked_users.all():
+            return Response({'title': 'Лельзя поставить лайк.'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = LikeSerializer(data={
             'post': post.pk,
@@ -129,8 +135,7 @@ class CommentViewSet(viewsets.ViewSet):
     serializer_class = CommentSerializer
 
     def destroy(self, request, pk=None):
-        queryset = Comment.objects.all()
-        comment = get_object_or_404(queryset, pk=pk)
+        comment = get_object_or_404(Comment, pk=pk)
         if comment.user != request.user:
             return Response({'title': 'нельзя удалить чужой комментарии'}, status=status.HTTP_403_FORBIDDEN)
         comment.delete()

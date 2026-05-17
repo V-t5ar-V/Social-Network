@@ -34,20 +34,21 @@ class Subscription(models.Model):
         return f'{self.pk}, following - {self.following.pk}~{self.following}, follower - {self.follower.pk}~{self.follower}, is_accepted - {self.subscription_status}'
 
 class User(AbstractUser):
-    @property
-    def followers(self):
-        return self.followers.filter(subscription_status='ACCEPTED')
-    @property
-    def following(self):
-        return self.following.filter(subscription_status='ACCEPTED')
-
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_groups',
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions',
-        blank=True
-    )
+    pass
+#     @property
+#     def followers(self):
+#         return self.followers.filter(subscription_status='ACCEPTED')
+#     @property
+#     def following(self):
+#         return self.following.filter(subscription_status='ACCEPTED')
+#
+#     groups = models.ManyToManyField(
+#         'auth.Group',
+#         related_name='custom_user_groups',
+#         blank=True
+#     )
+#     user_permissions = models.ManyToManyField(
+#         'auth.Permission',
+#         related_name='custom_user_permissions',
+#         blank=True
+#     )

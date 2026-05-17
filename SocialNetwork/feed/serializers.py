@@ -125,6 +125,17 @@ class CommentSerializer(serializers.Serializer):
         model = Comment
         fields = ['id', 'text', 'user', 'created_at', 'parent', 'post']
 
+    def to_representation(self, instance):
+
+        data = {
+            "id": instance.pk,
+            "text": instance.text,
+            "created_at": instance.created_at,
+            "parent": instance.parent.pk if instance.parent else None,
+            "post": instance.post.slug,
+        }
+        return data
+
     def create(self, validated_data):
         parent = validated_data.get('parent', None)
         if parent:
@@ -145,33 +156,21 @@ class LikeSerializer(serializers.Serializer):
     def to_representation(self, instance):
 
         data = {
-            'slug': instance.post.slug,
-            'like_id': instance.pk
+            'post_slug': instance.post.slug,
+            'like_id': instance.pk,
         }
 
         return data
 
-    def validate_like(self, user, post):
-        queryset = Like.objects.filter(user=user, post=post)
-        post_user = post.user
-
-        if queryset.exists():
-            raise serializers.ValidationError('Лайк уже существует.')
-
-        if user != post_user:
-
-            if user in post_user.profile.blocked_users.all():
-                raise serializers.ValidationError('Лайк недоступен.')
-
-            if post_user.profile.is_private and user not in post_user.followers.all():
-                raise serializers.ValidationError('Только подписчики могут создать лайк.')
-
-        return True
-
     def create(self, validated_data):
-        self.validate_like(validated_data['user'], validated_data['post'])
-        like = Like.objects.create(**validated_data)
+        like, created = Like.objects.get_or_create(user=validated_data['user'], post=validated_data['post'])
+        if not created:
+            print(created)
+            raise serializers.ValidationError({
+                                                "title":"Вы уже создали лайк",
+                                               "post_slug":like.post.slug,
+                                               "like_id": like.pk
+                                            })
         return like
-
 
 

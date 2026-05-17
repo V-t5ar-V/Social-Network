@@ -25,54 +25,35 @@ class SubscriptionSerializer(serializers.Serializer):
 
         return data
 
-    def validate_subscription(self, following, follower):
+    def validate(self, attrs):
+        if attrs["following"] == attrs["follower"]:
+            raise serializers.ValidationError({"title":"Нельзя подписаться на самого себя"})
+        return attrs
+    def validate_subscription(self, instance, following, follower, created):
 
-        if following == follower:
-            raise serializers.ValidationError({'following': 'Нельзя подписаться на самого себя.'})
+        if not created:
+            if instance.subscription_status == 'PENDING':
+                raise serializers.ValidationError({"title" : "Подписка уже в ожидании."})
 
-        if follower in following.profile.blocked_users.all():
-            raise serializers.ValidationError({'title': 'Подписка недоступна.'})
+            elif instance.subscription_status == 'ACCEPTED':
+                raise serializers.ValidationError({"title": "Подписка уже принята."})
 
-
-        queryset = Subscription.objects.filter(following=following, follower=follower)
-
-        if queryset.exists():
-
-            subscription = queryset.first()
-
-            if subscription.subscription_status == 'PENDING':
-                raise serializers.ValidationError('Подписка уже в ожидании')
-
-            elif subscription.subscription_status == 'ACCEPTED':
-                raise serializers.ValidationError('Подписка уже принята')
-
-            return subscription
-
-        return None
 
     def create(self, validated_data):
         follower = validated_data['follower']
         following = validated_data['following']
 
-        subscription = self.validate_subscription(following=following, follower=follower)
+        subscription, created = Subscription.objects.get_or_create(following=following, follower=follower)
 
-        updated_status = 'PENDING' if following.profile.is_private else 'ACCEPTED'
+        self.validate_subscription(instance=subscription, created=created, following=following, follower=follower)
 
-        if subscription:
+        subscription_status = "PENDING" if following.profile.is_private else "ACCEPTED"
 
+        subscription.subscription_status = subscription_status
+        if not created:
             subscription.sent_at = timezone.now()
-            subscription.subscription_status = updated_status
-            subscription.save()
 
-            return subscription
-
-
-
-        subscription = Subscription.objects.create(
-            following=following,
-            follower=follower,
-            subscription_status=updated_status
-        )
+        subscription.save()
 
         return subscription
 

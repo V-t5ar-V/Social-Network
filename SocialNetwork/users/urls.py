@@ -38,19 +38,19 @@ urlpatterns = [
         'get': 'get_follower_requests',
     })),
 
-    path('subscriptions/create/<slug:slug>/', SubscriptionViewSet.as_view({
-        'post': 'create',
+    path('subscriptions/<slug:slug>/follow/', ProfileViewSet.as_view({
+        'post': 'follow',
     }), name='create_subscription'),
 
-    path('subscriptions/<int:pk>/accept/', SubscriptionViewSet.as_view({
+    path('subscriptions/<slug:slug>/accept/', ProfileViewSet.as_view({
         'patch': 'accept'
     }), name='accept_subscription'),
-    path('subscriptions/<int:pk>/reject/', SubscriptionViewSet.as_view({
+    path('subscriptions/<slug:slug>/reject/', ProfileViewSet.as_view({
         'patch': 'reject'
     }), name='reject_subscription'),
 
-    path('subscriptions/<int:pk>/delete/', SubscriptionViewSet.as_view({
-        'delete': 'destroy'
+    path('subscriptions/<slug:slug>/unfollow/', ProfileViewSet.as_view({
+        'delete': 'unfollow'
     }), name='delete_subscription'),
 
 

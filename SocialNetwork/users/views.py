@@ -71,48 +71,6 @@ class SubscriptionViewSet(viewsets.ViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def create(self, request, slug=None):
-        following = get_object_or_404(User, username=slug)
-        serializer = self.serializer_class(data=
-                                                {'following': following.pk,
-                                                 'follower': request.user.pk
-                                                 },
-                                           context=
-                                                {'request': request}
-                                           )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['patch'], detail=True)
-    def accept(self, request, pk=None):
-        queryset = Subscription.objects.all()
-        subscription = get_object_or_404(queryset, pk=pk)
-        if request.user != subscription.following:
-            return Response({'title': 'Принять запрос может только получатель запроса.'}, status=status.HTTP_403_FORBIDDEN)
-        serializer = self.serializer_class(subscription, data={'subscription_status': 'ACCEPTED'}, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['patch'], detail=True)
-    def reject(self, request, pk=None):
-        queryset = Subscription.objects.all()
-        subscription = get_object_or_404(queryset, pk=pk)
-        if request.user != subscription.following:
-            return Response({'title': 'Отклонить запрос можно только получатель запроса.'}, status=status.HTTP_403_FORBIDDEN)
-        serializer = self.serializer_class(subscription, data={'subscription_status': 'REJECTED'}, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'title': 'успешно отклонено'}, status=status.HTTP_200_OK)
-
-    def destroy(self, request, pk=None):
-        queryset = Subscription.objects.all()
-        subscription = get_object_or_404(queryset, pk=pk)
-        if request.user in [subscription.following, subscription.follower]:
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({'title': 'удалить подписку могут только following и follower'}, status=status.HTTP_403_FORBIDDEN)
 
 
 
@@ -129,11 +87,11 @@ class ProfileViewSet(viewsets.ViewSet):
 
 
     def retrieve(self, request, slug=None):
-        user_queryset = User.objects.all()
-        user = get_object_or_404(user_queryset, username=slug)
+        user = get_object_or_404(User, username=slug)
         if request.user != user:
-            if user.profile.is_private and request.user not in user.followers.all():
-                return Response({'title': 'Профиль приватный.'}, status=status.HTTP_403_FORBIDDEN) ##################
+            if user.profile.is_private:
+                if not user.followers.filter(follower=request.user, subscription_status='ACCEPTED').exists():
+                    return Response({'title': 'Профиль приватный.'}, status=status.HTTP_403_FORBIDDEN)
         if request.user in user.profile.blocked_users.all():
             return Response({'title':'Профиль недоступен'}, status=status.HTTP_403_FORBIDDEN)
         serializer = self.serializer_class(user.profile, context={'request': request})
@@ -205,6 +163,35 @@ class ProfileViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"title": "Пользователь разблокирован."}, status=status.HTTP_200_OK)
+
+    @action(methods=['create'], detail=True)
+    def follow(self, request, slug=None):
+        following = get_object_or_404(User, username=slug)
+        follower = request.user
+        if follower in following.profile.blocked_users.all():
+            return Response({'title': 'Вы не можете подписаться на этого пользователя.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = SubscriptionSerializer(data={
+                            "following": following.pk,
+                            "follower": follower.pk
+                            },
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['patch'], detail=True)
+    def accept(self, request, pk=None):
+        pass
+
+    @action(methods=['patch'], detail=True)
+    def reject(self, request, pk=None): ######################
+
+        pass
+
+    @action(methods=['delete'], detail=True)
+    def unfollow(self, request, slug=None):
+        pass
 
 
 class PostAllowAny(permissions.BasePermission):
