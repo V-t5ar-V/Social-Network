@@ -8,12 +8,12 @@ urlpatterns = [
     path('register/', UserViewSet.as_view({
         'post': 'create',
     }), name='register'),
-    path('edit_user/', UserViewSet.as_view({
+    path('edit-user/', UserViewSet.as_view({
         'patch': 'partial_update',
     })),
 
 
-    path('profiles/edit_profile/', ProfileViewSet.as_view({
+    path('profiles/edit-profile/', ProfileViewSet.as_view({
         'patch': 'partial_update',
     })),
     path('profiles/detail/<slug:slug>/',ProfileViewSet.as_view({
@@ -31,10 +31,10 @@ urlpatterns = [
     }), name='followers'),
 
 
-    path('subscriptions/requests/following/', SubscriptionViewSet.as_view({
+    path('profiles/requests/following/', SubscriptionViewSet.as_view({
         'get': 'got_following_requests',
     })),
-    path('subscriptions/requests/followers/', SubscriptionViewSet.as_view({
+    path('profiles/requests/followers/', SubscriptionViewSet.as_view({
         'get': 'get_follower_requests',
     })),
 
@@ -43,10 +43,10 @@ urlpatterns = [
     }), name='create_subscription'),
 
     path('subscriptions/<slug:slug>/accept/', ProfileViewSet.as_view({
-        'patch': 'accept'
+        'patch': 'accept_subscription'
     }), name='accept_subscription'),
     path('subscriptions/<slug:slug>/reject/', ProfileViewSet.as_view({
-        'patch': 'reject'
+        'patch': 'reject_subscription'
     }), name='reject_subscription'),
 
     path('subscriptions/<slug:slug>/unfollow/', ProfileViewSet.as_view({

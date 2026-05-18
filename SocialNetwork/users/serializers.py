@@ -25,11 +25,7 @@ class SubscriptionSerializer(serializers.Serializer):
 
         return data
 
-    def validate(self, attrs):
-        if attrs["following"] == attrs["follower"]:
-            raise serializers.ValidationError({"title":"Нельзя подписаться на самого себя"})
-        return attrs
-    def validate_subscription(self, instance, following, follower, created):
+    def validate_subscription(self, instance, created):
 
         if not created:
             if instance.subscription_status == 'PENDING':
@@ -42,10 +38,12 @@ class SubscriptionSerializer(serializers.Serializer):
     def create(self, validated_data):
         follower = validated_data['follower']
         following = validated_data['following']
+        if following == follower:
+            raise serializers.ValidationError({"title": "Нельзя подписаться на самого себя."})
 
         subscription, created = Subscription.objects.get_or_create(following=following, follower=follower)
 
-        self.validate_subscription(instance=subscription, created=created, following=following, follower=follower)
+        self.validate_subscription(instance=subscription, created=created)
 
         subscription_status = "PENDING" if following.profile.is_private else "ACCEPTED"
 
@@ -62,13 +60,17 @@ class SubscriptionSerializer(serializers.Serializer):
 
 
     def update(self, instance, validated_data):
-        if 'subscription_status' not in validated_data:
+        subscription_status = validated_data.get('subscription_status', None)
+        if subscription_status is None:
             raise serializers.ValidationError('Доступно только изменение статуса подписки.')
-        if  validated_data['subscription_status'] == 'PENDING':
+
+        if subscription_status == "PENDING":
             raise serializers.ValidationError('Нельзя назначить такой статус подписки.')
-        if instance.subscription_status != 'PENDING':
-            raise serializers.ValidationError('Нельзя изменить статус подписки.')
-        instance.subscription_status = validated_data['subscription_status']
+
+        if instance.subscription_status != "PENDING":
+            raise serializers.ValidationError('Можно принять/отклонить только ожидаемые запросы')
+
+        instance.subscription_status = subscription_status
         instance.save()
         return instance
 

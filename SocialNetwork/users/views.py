@@ -181,17 +181,34 @@ class ProfileViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True)
-    def accept(self, request, pk=None):
-        pass
+    def accept_subscription(self, request, slug=None):
+        follower = get_object_or_404(User, username=slug)
+        following = request.user
+        subscription = get_object_or_404(Subscription, following=following, follower=follower)
+        serializer = SubscriptionSerializer(subscription, data={"subscription_status": "ACCEPTED"}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True)
-    def reject(self, request, pk=None): ######################
+    def reject_subscription(self, request, slug=None): ######################
+        follower = get_object_or_404(User, username=slug)
+        following = request.user
+        subscription = get_object_or_404(Subscription, following=following, follower=follower)
+        serializer = SubscriptionSerializer(subscription, data={"subscription_status": "REJECTED"}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        pass
 
-    @action(methods=['delete'], detail=True)
     def unfollow(self, request, slug=None):
-        pass
+        follower = request.user
+        following = get_object_or_404(User, username=slug)
+        subscription = get_object_or_404(Subscription, following=following, follower=follower)
+        serializer = SubscriptionSerializer(subscription, data={"subscription_status": "REJECTED"}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PostAllowAny(permissions.BasePermission):
