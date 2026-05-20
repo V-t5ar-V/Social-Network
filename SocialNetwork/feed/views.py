@@ -103,9 +103,9 @@ class PostViewSet(viewsets.ViewSet):
         if user != post.user:
             if profile.is_private:
                 if not post.user.followers.filter(follower=user, subscription_status='ACCEPTED').exists():
-                    return Response({'title': 'Лельзя поставить лайк.'}, status=status.HTTP_403_FORBIDDEN)
+                    return Response({'title': 'Нельзя поставить лайк.'}, status=status.HTTP_403_FORBIDDEN)
         if user in profile.blocked_users.all():
-            return Response({'title': 'Лельзя поставить лайк.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'title': 'Нельзя поставить лайк.'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = LikeSerializer(data={
             'post': post.pk,
@@ -128,6 +128,20 @@ class PostViewSet(viewsets.ViewSet):
             like.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({'title': 'Вы не ставили лайка посту'}, status=status.HTTP_404_NOT_FOUND)
+
+    def profile_posts_list(self, request, slug=None):
+        user = request.user
+        profile = get_object_or_404(User, username=slug).profile
+        if user != profile.user:
+            if user in profile.blocked_users.all():
+                return Response({'title': 'Просмотр профиля недоступен.'}, status=status.HTTP_403_FORBIDDEN)
+            if profile.is_private and not profile.user.followers.filter(follower=user, subscription_status='ACCEPTED').exists():
+                return Response({'title': 'Посты доступны только подписчикам.'}, status=status.HTTP_403_FORBIDDEN)
+
+        posts = profile.user.posts
+        serializer = PostSerializer(posts, many=True, context={'request': request})
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CommentViewSet(viewsets.ViewSet):

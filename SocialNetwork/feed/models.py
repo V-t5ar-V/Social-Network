@@ -6,7 +6,7 @@ User = get_user_model()
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=100)
-    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField('Tag', related_name='tags', blank=True)

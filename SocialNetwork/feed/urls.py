@@ -35,5 +35,7 @@ urlpatterns = [
         "delete": "destroy",
     }), name='comments'),
 #     path('posts/<slug:slug>/views/', noview, name='number_of_views'),
-#     path('profiles/<slug:slug>/posts/', noview(), name='posts_list'),
+    path('profiles/<slug:slug>/posts/', PostViewSet.as_view({
+        'get': 'profile_posts_list'
+    }), name='posts_list'),
 ]

@@ -21,7 +21,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def got_following_requests(self,request):
+    def got_following_requests(self, request):
         queryset = Subscription.objects.filter(follower=request.user, subscription_status='PENDING').order_by('-sent_at')
         if queryset.exists():
             serializer = self.serializer_class(queryset, many=True)
@@ -35,7 +35,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
         profile = user.profile
 
         if user != request.user:
-            if profile.is_private and request.user not in profile.user.following.all():
+            if profile.is_private and not profile.user.followers.filter(follower=request.user, subscription_status='ACCEPTED').exists():
                 return Response({'title': 'Только подписчики могу посмотреть список подписок.'},
                                 status=status.HTTP_403_FORBIDDEN)
             if request.user in profile.blocked_users.all():
@@ -58,7 +58,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
         profile = user.profile
 
         if user != request.user:
-            if profile.is_private and request.user not in profile.user.following.all():
+            if profile.is_private and not profile.user.followers.filter(follower=request.user, subscription_status='ACCEPTED').exists():
                 return Response({'title': 'Только подписчики могу посмотреть список подписок.'},
                                 status=status.HTTP_403_FORBIDDEN)
 

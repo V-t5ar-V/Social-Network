@@ -2,8 +2,6 @@ from .views import UserViewSet, ProfileViewSet, SubscriptionViewSet
 
 from django.urls import path
 
-
-
 urlpatterns = [
     path('register/', UserViewSet.as_view({
         'post': 'create',
@@ -63,5 +61,4 @@ urlpatterns = [
 
 
     # path('profiles/<slug:slug>/qr_code', noview(),name='QR_code'),
-    # path('profiles/<slug:slug>/posts/', noview(), name='posts_list'),
 ]
