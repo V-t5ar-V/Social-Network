@@ -15,6 +15,7 @@ class MediaSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(max_length=100, default='', required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     created_at = serializers.DateTimeField(default=timezone.now, read_only=True)
@@ -24,7 +25,7 @@ class PostSerializer(serializers.Serializer):
     media = serializers.ListField(child=serializers.FileField(), default=[])
     class Meta:
         model = Post
-        fields = ['title', 'user', 'created_at', 'description', 'tags', 'slug']
+        fields = ['id', 'title', 'user', 'created_at', 'description', 'tags', 'slug']
 
 
 

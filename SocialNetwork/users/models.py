@@ -3,6 +3,7 @@ from django.utils.text import slugify
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
+
 class Profile(models.Model):
     user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='profile')
     name = models.CharField(max_length=30, default='NoName')
@@ -21,6 +22,7 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.slug}, name={self.user.username}'
 
+
 class Subscription(models.Model):
     following = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='followers')
     follower = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='following')
@@ -32,6 +34,7 @@ class Subscription(models.Model):
         unique_together = ('following', 'follower')
     def __str__(self):
         return f'{self.pk}, following - {self.following.pk}~{self.following}, follower - {self.follower.pk}~{self.follower}, is_accepted - {self.subscription_status}'
+
 
 class User(AbstractUser):
     pass

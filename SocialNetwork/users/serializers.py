@@ -75,10 +75,6 @@ class SubscriptionSerializer(serializers.Serializer):
         return instance
 
 
-
-
-
-
 class ProfileSerializer(serializers.Serializer):                                            #UNSTABLE
     id = serializers.IntegerField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault(), required=False)
@@ -216,6 +212,4 @@ class UserSerializer(serializers.ModelSerializer):
             instance.email = email
         instance.save()
         return instance
-
-
 

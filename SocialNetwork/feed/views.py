@@ -16,7 +16,7 @@ class PostViewSet(viewsets.ViewSet):
     serializer_class = PostSerializer
     pagination_class = PageNumberPagination
     def list(self, request):
-        queryset = Post.objects.all().order_by('created_at')
+        queryset = Post.objects.all().order_by('-created_at')
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request, view=self)
 
@@ -155,9 +155,7 @@ class CommentViewSet(viewsets.ViewSet):
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class LikeViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = LikeSerializer
-
-
-

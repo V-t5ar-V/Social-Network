@@ -15,14 +15,14 @@ class SubscriptionViewSet(viewsets.ViewSet):
     serializer_class = SubscriptionSerializer
 
     def get_follower_requests(self, request):
-        queryset = Subscription.objects.filter(following=request.user, subscription_status='PENDING').order_by('-sent_at')
+        queryset = request.user.followers.filter(subscription_status='PENDING').order_by('-sent_at')
         if not queryset.exists():
             return Response(data={'title':'Вы не получали запросов на подписку'}, status=status.HTTP_204_NO_CONTENT)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def got_following_requests(self, request):
-        queryset = Subscription.objects.filter(follower=request.user, subscription_status='PENDING').order_by('-sent_at')
+        queryset = request.user.followers.filter(subscription_status='PENDING').order_by('-sent_at')
         if queryset.exists():
             serializer = self.serializer_class(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -30,7 +30,7 @@ class SubscriptionViewSet(viewsets.ViewSet):
 
 
     @action(methods=['get'], detail=False)
-    def get_following(self, request, slug=None): #########################
+    def get_following(self, request, slug=None):
         user = get_object_or_404(User.objects.all(), username=slug)
         profile = user.profile
 
@@ -70,14 +70,6 @@ class SubscriptionViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-
-
-
-
-
 
 
 class ProfileViewSet(viewsets.ViewSet):
