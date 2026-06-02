@@ -13,14 +13,14 @@ from rest_framework.decorators import action
 class SubscriptionViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SubscriptionSerializer
-
+    @action(methods=['get'], detail=False)
     def get_follower_requests(self, request):
         queryset = request.user.followers.filter(subscription_status='PENDING').order_by('-sent_at')
         if not queryset.exists():
             return Response(data={'title':'Вы не получали запросов на подписку'}, status=status.HTTP_204_NO_CONTENT)
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    @action(methods=['get'], detail=False)
     def got_following_requests(self, request):
         queryset = request.user.followers.filter(subscription_status='PENDING').order_by('-sent_at')
         if queryset.exists():

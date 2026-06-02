@@ -118,7 +118,7 @@ class ProfileSerializer(serializers.Serializer):                                
 
 
         if pic.content_type not in allowed_types:
-            raise serializers.ValidationError('Недопустимый тип меди, разрешены только png и jpg.')
+            raise serializers.ValidationError('Недопустимый тип медиа, разрешены только png и jpg.')
 
         if pic.size > pfp_max_size:
             raise serializers.ValidationError('Слишком большое изображение (> 5 Мб).')
@@ -127,12 +127,15 @@ class ProfileSerializer(serializers.Serializer):                                
 
     def create(self, validated_data):
         blocked_users = validated_data.pop('blocked_users', [])
+        profile_pic = validated_data.get('profile_pic', None)
+        if profile_pic is not None:
+            self.validate_profile_pic(profile_pic)
         profile = Profile.objects.create(
             user=validated_data['user'],
             slug=validated_data['user'].username,
             is_private=validated_data.get('is_private', False),
             bio=validated_data.get('bio'),
-            profile_pic=validated_data.get('profile_pic'),
+            profile_pic=profile_pic if profile_pic else None,
         )
         if blocked_users:
             profile.blocked_users.set(blocked_users)

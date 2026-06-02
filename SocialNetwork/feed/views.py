@@ -1,5 +1,4 @@
 from rest_framework.decorators import action
-from django.contrib.admin.templatetags.admin_list import pagination
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
