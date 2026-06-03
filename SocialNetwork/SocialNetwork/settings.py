@@ -24,21 +24,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
-# #0ig
+# SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = "django-insecure-am7$w_w36l-)k+xo7_946b$icyoh&l_c=0(0$)exs@vms10ig"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG')
-
+# DEBUG = os.environ.get('DEBUG')
+DEBUG = True
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'channels',
+    # 'daphne',
+    # 'channels',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -160,10 +159,10 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': True,
 }
 
-ASGI_APPLICATION = 'config.asgi.application'
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    }
-}
+# ASGI_APPLICATION = 'config.asgi.application'
+#
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels.layers.InMemoryChannelLayer",
+#     }
+# }
