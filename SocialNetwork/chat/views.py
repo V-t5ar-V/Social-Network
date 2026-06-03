@@ -89,7 +89,7 @@ class ChatViewSet(viewsets.ViewSet):
 
 
         paginator = self.pagination_class()
-        page = paginator.paginate_queryset(chat_content, request, view=self)# <-- error
+        page = paginator.paginate_queryset(chat_content, request, view=self)
 
         if page is not None:
             serializer = ChatMemberSerializer(page, many=True, context={'request': request})

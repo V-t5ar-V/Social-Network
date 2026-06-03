@@ -155,8 +155,8 @@ class StickerSerializer(serializers.Serializer):
 
         validated_data.pop('keywords', None)
 
-        sticker = Sticker.objects.create(**validated_data, keywords=keywords)
-
+        sticker = Sticker.objects.create(**validated_data)
+        sticker.keywords.set(keywords)
         return sticker
 
 
