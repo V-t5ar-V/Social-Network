@@ -1,6 +1,7 @@
 from .models import *
 from rest_framework import serializers
 from django.utils import timezone
+from django.db import transaction
 
 class ChatSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False)
@@ -54,7 +55,7 @@ class ChatSerializer(serializers.Serializer):
         user = validated_data.pop('user')
         print(validated_data.get('icon', None))
         chat = Chat.objects.create(**validated_data)
-        ChatMember.objects.create(user=user, chat=chat, is_admin=True)
+        ChatMember.objects.create(member=user, chat=chat, is_admin=True)
         return chat
 
 
@@ -111,13 +112,85 @@ class ChatMemberSerializer(serializers.Serializer):
 
 
 class ChatContentSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    user = serializers.IntegerField()
-    chat = serializers.IntegerField()
-    created_at = serializers.DateTimeField()
-    content = serializers.CharField()
-    content_type = serializers.CharField()
-    parent = serializers.IntegerField(allow_null=True)
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        data = {
+            'id': instance.pk,
+            'chat': instance.chat_id,
+            'user': instance.user_id,
+            'username': instance.user.username,
+            'sent_at': instance.sent_at,
+            'created_at': instance.sent_at,
+            'parent': instance.parent_id,
+        }
+
+        if isinstance(instance, Message):
+            data.update({
+                'content_type': 'message',
+                'content': instance.text,
+                'text': instance.text,
+                'status': instance.status,
+            })
+            return data
+
+        image_url = instance.sticker.image.url if instance.sticker.image else None
+        if request and image_url:
+            image_url = request.build_absolute_uri(image_url)
+
+        data.update({
+            'content_type': 'sticker',
+            'content': image_url,
+            'sticker': instance.sticker_id,
+            'image': image_url,
+        })
+        return data
+
+
+class ChatMessageCreateSerializer(serializers.Serializer):
+    text = serializers.CharField(required=False, allow_blank=True, trim_whitespace=True)
+    sticker = serializers.PrimaryKeyRelatedField(queryset=Sticker.objects.all(), required=False, allow_null=True)
+    parent = serializers.PrimaryKeyRelatedField(queryset=Message.objects.all(), required=False, allow_null=True)
+
+    def validate(self, data):
+        text = data.get('text', '')
+        sticker = data.get('sticker')
+
+        if not text and sticker is None:
+            raise serializers.ValidationError({'title': 'Нужно отправить текст, стикер или оба сразу.'})
+
+        parent = data.get('parent')
+        chat = self.context.get('chat')
+        if parent and chat and parent.chat_id != chat.pk:
+            raise serializers.ValidationError({'parent': 'Ответить можно только на сообщение из этого же чата.'})
+
+        return data
+
+    @transaction.atomic
+    def create(self, validated_data):
+        chat = self.context['chat']
+        user = self.context['request'].user
+        text = validated_data.get('text', '')
+        sticker = validated_data.get('sticker')
+        parent = validated_data.get('parent')
+
+        created_content = []
+        if text:
+            created_content.append(Message.objects.create(
+                chat=chat,
+                user=user,
+                text=text,
+                parent=parent,
+            ))
+
+        if sticker is not None:
+            created_content.append(StickerMessage.objects.create(
+                chat=chat,
+                user=user,
+                sticker=sticker,
+                parent=parent,
+            ))
+
+        return created_content
 
 # class MessageSerializer(serializers.Serializer):
 #     id = serializers.IntegerField()
@@ -128,8 +201,8 @@ class ChatContentSerializer(serializers.Serializer):
 #     parent = serializers.IntegerField()
 
 class StickerSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    id = serializers.IntegerField(read_only=True)
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
     image = serializers.ImageField()
     keywords = serializers.ListField(child=serializers.CharField(), required=False)
 
@@ -143,21 +216,32 @@ class StickerSerializer(serializers.Serializer):
             icon_max_size = 1024 * 1024 * 3
             if image.content_type not in allowed_types:
                 raise serializers.ValidationError('Недопустимый тип медиа')
-            elif image.sixe > icon_max_size:
+            elif image.size > icon_max_size:
                 raise serializers.ValidationError('Слишком большое изображение')
         return data
 
     def create(self, validated_data):
-        keywords = []
-        for keyword in validated_data.get('keywords', []):
+        keywords = validated_data.pop('keywords', [])
+        sticker = Sticker.objects.create(**validated_data)
+
+        for keyword in keywords:
             word, _ = Keyword.objects.get_or_create(keyword=keyword)
-            keywords.append(word.pk)
-
-        validated_data.pop('keywords', None)
-
-        sticker = Sticker.objects.create(**validated_data, keywords=keywords)
+            sticker.keywords.add(word)
 
         return sticker
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        image_url = instance.image.url if instance.image else None
+        if request and image_url:
+            image_url = request.build_absolute_uri(image_url)
+
+        return {
+            'id': instance.pk,
+            'author': instance.author_id,
+            'image': image_url,
+            'keywords': list(instance.keywords.values_list('keyword', flat=True)),
+        }
 
 
 

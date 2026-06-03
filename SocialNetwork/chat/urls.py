@@ -23,16 +23,18 @@ urlpatterns = [
         'patch': 'partial_update'
     })),
     path('chats/<int:pk>/messages/', ChatViewSet.as_view({
-        'get': 'messages', # <-----
+        'get': 'messages',
+        'post': 'messages',
     }), name='message_list'),
     path('sticker_catalog/', StickerViewSet.as_view({
         'get': 'list', #
+        'post': 'create',
     }), name='sticker_list'),
     path('sticker_catalog/search/<slug:slug>/', StickerViewSet.as_view({
         'get': 'search_by_keyword',
     }), name='sticker_list'),
     path('stickers_catalog/detail/<int:pk>/', StickerViewSet.as_view({
-        'get': 'detail',
+        'get': 'retrieve',
         'delete': 'destroy',
     }), name='sticker_detail'),
     # path('messages/<int:pk>', MessageViewSet.as_view({
