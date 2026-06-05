@@ -159,7 +159,7 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': True,
 }
 
-ASGI_APPLICATION = 'config.asgi.application'
+ASGI_APPLICATION = 'SocialNetwork.asgi.application'
 #
 CHANNEL_LAYERS = {
     "default": {
