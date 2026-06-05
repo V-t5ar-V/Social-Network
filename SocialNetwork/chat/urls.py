@@ -37,7 +37,7 @@ urlpatterns = [
         'get': 'retrieve',
         'delete': 'destroy',
     }), name='sticker_detail'),
-    # path('messages/<int:pk>', MessageViewSet.as_view({
+    # path('messages/<int:pk>', TextMessageViewSet.as_view({
     #     'delete': 'destroy',
     #     'patch': 'partial_update'
     # }), name='edit/delete message'),

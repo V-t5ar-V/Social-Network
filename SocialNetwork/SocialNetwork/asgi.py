@@ -7,20 +7,15 @@ For more information on this file, see
 https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 """
 
-# from channels.routing import ProtocolTypeRouter
-# from channels.security.websocket import
-# django_asgi_app = get_asgi_application()
-#
-#
-# application = ProtocolTypeRouter({
-#     'http': django_asgi_app,
-#     # "websocket":
-# })
-
 import os
 
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+import chat.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SocialNetwork.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    'http': get_asgi_application(),
+    'websocket': URLRouter(chat.routing.websocket_urlpatterns)
+})

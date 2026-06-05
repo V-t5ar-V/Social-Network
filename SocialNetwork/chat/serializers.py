@@ -146,7 +146,7 @@ class ChatContentSerializer(serializers.Serializer):
         return data
 
 
-class ChatMessageCreateSerializer(serializers.Serializer):
+class ChatMessageSerializer(serializers.Serializer):
     text = serializers.CharField(required=False, allow_blank=True, trim_whitespace=True)
     sticker = serializers.PrimaryKeyRelatedField(queryset=Sticker.objects.all(), required=False, allow_null=True)
     parent = serializers.PrimaryKeyRelatedField(queryset=Message.objects.all(), required=False, allow_null=True)
@@ -192,13 +192,14 @@ class ChatMessageCreateSerializer(serializers.Serializer):
 
         return created_content
 
-# class MessageSerializer(serializers.Serializer):
-#     id = serializers.IntegerField()
-#     chat = serializers.PrimaryKeyRelatedField(queryset=Chat.objects.all(), read_only=True)
-#     created_at = serializers.DateTimeField()
-#     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), read_only=True)
-#     text = serializers.CharField()
-#     parent = serializers.IntegerField()
+    # def update(self, instance, validated_data):
+    #     text = validated_data.pop('text', None)
+    #     if text is None:
+    #         raise serializers.ValidationError({'title': 'Сообщение должно иметь содержание.'})
+    #     instance.text = text
+    #     instance.save()
+    #     return instance
+
 
 class StickerSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -213,7 +214,7 @@ class StickerSerializer(serializers.Serializer):
         image = data.get('image', None)
         if image is not None:
             allowed_types = ('image/png', 'image/jpeg')
-            icon_max_size = 1024 * 1024 * 3
+            icon_max_size = 1024 * 1024 * 1
             if image.content_type not in allowed_types:
                 raise serializers.ValidationError('Недопустимый тип медиа')
             elif image.size > icon_max_size:

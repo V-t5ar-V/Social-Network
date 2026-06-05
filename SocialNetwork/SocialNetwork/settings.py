@@ -36,8 +36,8 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 # Application definition
 
 INSTALLED_APPS = [
-    # 'daphne',
-    # 'channels',
+    'daphne',
+    'channels',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -159,10 +159,10 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': True,
 }
 
-# ASGI_APPLICATION = 'config.asgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 #
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels.layers.InMemoryChannelLayer",
-#     }
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}

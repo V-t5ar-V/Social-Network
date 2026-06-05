@@ -1,14 +1,15 @@
 from django.contrib.auth import get_user_model
+from django.contrib.messages.storage.cookie import MessageSerializer
 from rest_framework import pagination, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from .models import Chat, ChatMember, Sticker
+from .models import Chat, ChatMember, Sticker, Message
 from .serializers import (
     ChatContentSerializer,
     ChatMemberSerializer,
-    ChatMessageCreateSerializer,
+    ChatMessageSerializer,
     ChatSerializer,
     StickerSerializer,
 )
@@ -19,7 +20,7 @@ User = get_user_model()
 class MessagePagination(pagination.PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
-    page_size = 30
+    page_size = 3
 
 
 class ChatViewSet(viewsets.ViewSet):
@@ -85,7 +86,7 @@ class ChatViewSet(viewsets.ViewSet):
             return Response({'title': 'Доступ запрещен.'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.method == 'POST':
-            serializer = ChatMessageCreateSerializer(data=request.data, context={'request': request, 'chat': chat})
+            serializer = ChatMessageSerializer(data=request.data, context={'request': request, 'chat': chat})
             serializer.is_valid(raise_exception=True)
             created_content = serializer.save()
             response_serializer = ChatContentSerializer(created_content, many=True, context={'request': request})
@@ -96,7 +97,7 @@ class ChatViewSet(viewsets.ViewSet):
         chat_content = sorted(messages + stickers, key=lambda item: item.sent_at, reverse=True)
 
         paginator = self.pagination_class()
-        page = paginator.paginate_queryset(chat_content, request, view=self)
+        page = paginator.paginate_queryset(chat_content, request, view=self)# <-- error
 
         if page is not None:
             serializer = ChatContentSerializer(page, many=True, context={'request': request})
