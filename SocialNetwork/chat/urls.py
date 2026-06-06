@@ -30,15 +30,11 @@ urlpatterns = [
         'get': 'list', #
         'post': 'create',
     }), name='sticker_list'),
-    path('sticker_catalog/search/<slug:slug>/', StickerViewSet.as_view({
+    path('stickers_catalog/search/<slug:slug>/', StickerViewSet.as_view({
         'get': 'search_by_keyword',
     }), name='sticker_list'),
     path('stickers_catalog/detail/<int:pk>/', StickerViewSet.as_view({
         'get': 'retrieve',
         'delete': 'destroy',
     }), name='sticker_detail'),
-    # path('messages/<int:pk>', TextMessageViewSet.as_view({
-    #     'delete': 'destroy',
-    #     'patch': 'partial_update'
-    # }), name='edit/delete message'),
 ]

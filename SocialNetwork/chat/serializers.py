@@ -239,7 +239,7 @@ class StickerSerializer(serializers.Serializer):
 
         return {
             'id': instance.pk,
-            'author': instance.author_id,
+            'author': instance.author.username,
             'image': image_url,
             'keywords': list(instance.keywords.values_list('keyword', flat=True)),
         }

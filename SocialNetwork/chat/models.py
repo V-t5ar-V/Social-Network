@@ -40,10 +40,16 @@ class Message(models.Model):
 
 class StickerMessage(models.Model):
     chat = models.ForeignKey('Chat', on_delete=models.CASCADE, related_name='stickers')
-    sticker = models.ForeignKey('Sticker', on_delete=models.CASCADE)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    sticker = models.ForeignKey('Sticker', on_delete=models.CASCADE)
     sent_at = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('Message', on_delete=models.CASCADE, null=True, blank=True)
+    message_statuses = [
+        (1,'sent'),
+        (2, 'delivered'),
+        (3, 'read'),
+    ]
+    status = models.IntegerField(choices=message_statuses, default=1)
 
     def __str__(self):
         return f"{self.chat.name} - {self.user.username}, pk: {self.pk}"
@@ -54,7 +60,7 @@ class Sticker(models.Model):
     keywords = models.ManyToManyField('Keyword', related_name='keywords')
 
     def __str__(self):
-        return f"{self.author.name} - {self.pk}"
+        return f"{self.author.username} - {self.pk}"
 
 class Keyword(models.Model):
     keyword = models.CharField(max_length=30, primary_key=True)
