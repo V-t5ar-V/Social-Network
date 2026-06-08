@@ -11,6 +11,9 @@ from rest_framework.decorators import action
 # Create your views here.
 
 class SubscriptionViewSet(viewsets.ViewSet):
+    """
+    Управление подписками, получение списка полученных/отправленных запросов в ожидании, получение списка подписок/подписчиков.
+    """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SubscriptionSerializer
     @action(methods=['get'], detail=False)
@@ -73,6 +76,10 @@ class SubscriptionViewSet(viewsets.ViewSet):
 
 
 class ProfileViewSet(viewsets.ViewSet):
+    """
+    Управление профилями и пользовательское взаимодействие. Детальный просмотр, обновление, блокировка нежелательных пользователей, разблокировка,
+    удаление профиля и пользователя, подписаться на пользователя, принять запрос на подписку от другого пользователя, отписаться от пользователя.
+    """
     lookup_field = 'slug'
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ProfileSerializer
@@ -204,6 +211,9 @@ class ProfileViewSet(viewsets.ViewSet):
 
 
 class PostAllowAny(permissions.BasePermission):
+    """
+    Кастомный класс разрешений.
+    """
     def has_permission(self, request, view):
         if request.method == "POST":
             return True
@@ -211,6 +221,9 @@ class PostAllowAny(permissions.BasePermission):
 
 
 class UserViewSet(viewsets.ViewSet):
+    """
+    Управление пользователями (создать, обновить).
+    """
     lookup_field = 'username'
     permission_classes = [PostAllowAny]
 

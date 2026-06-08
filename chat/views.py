@@ -18,12 +18,19 @@ User = get_user_model()
 
 
 class MessagePagination(pagination.PageNumberPagination):
+    """
+    Класс для настройки пагинации сообщений чата
+    """
     page_size_query_param = 'page_size'
     max_page_size = 100
     page_size = 3
 
 
 class ChatViewSet(viewsets.ViewSet):
+    """
+    Управление чатами. Получение списка чатов, их детальный просмотр, создание чатов, удаление,
+    получение списка участников, и пагинированный список сообщении в чате
+    """
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = MessagePagination
 
@@ -107,6 +114,9 @@ class ChatViewSet(viewsets.ViewSet):
 
 
 class ChatMemberViewSet(viewsets.ViewSet):
+    """
+    Управление участниками чата. Добавление, удаление, обновление роли.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request):
@@ -153,6 +163,9 @@ class ChatMemberViewSet(viewsets.ViewSet):
 
 
 class StickerViewSet(viewsets.ViewSet):
+    """
+    Управление стикерами. Создание, получение списка, получение списка по ключевому слову, детальный просмотр и удаление.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request):

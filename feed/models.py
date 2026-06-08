@@ -54,6 +54,9 @@ class Like(models.Model):
         unique_together = ('user', 'post')
 
 class Post_View(models.Model):
+    """
+    На данный момент модель не используется...
+    """
     viewer = models.ForeignKey('users.User', on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE, default=None)
     created_at = models.DateTimeField(auto_now_add=True)

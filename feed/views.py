@@ -11,6 +11,10 @@ from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 
 
 class PostViewSet(viewsets.ViewSet):
+    """
+    Управление постами. Создание, редактирование, удаление, пользовательское взаимодействие (комментарии, лайки).
+    И все посты конкретного пользователя.
+    """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PostSerializer
     pagination_class = PageNumberPagination
@@ -154,7 +158,3 @@ class CommentViewSet(viewsets.ViewSet):
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class LikeViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = LikeSerializer

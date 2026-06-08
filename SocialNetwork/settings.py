@@ -24,20 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('SECRET_KEY')
-SECRET_KEY = "django-insecure-am7$w_w36l-)k+xo7_946b$icyoh&l_c=0(0$)exs@vms10ig"
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.environ.get('DEBUG')
-DEBUG = True
+
+DEBUG = os.environ.get('DEBUG')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
 
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'channels',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,14 +43,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework_simplejwt',
-    'rest_framework',
+    #Дополнительные технологии.
+    'daphne',
+    'channels',
     'drf_yasg',
+    'rest_framework',
+    'rest_framework_simplejwt',
 
-    #apps
+    #Приложения
     'users',
     'feed',
     'chat',
+
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -97,16 +99,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DATABASE_DB'),
-#         'USER': os.environ.get('DATABASE_USER'),
-#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-#         'HOST': os.environ.get('DATABASE_HOST'),
-#         'PORT': os.environ.get('DATABASE_PORT'),
-#  }
-#  }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -141,6 +133,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 STATIC_URL = 'static/'
@@ -159,7 +152,7 @@ SIMPLE_JWT = {
 }
 
 ASGI_APPLICATION = 'SocialNetwork.asgi.application'
-#
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
