@@ -11,11 +11,11 @@ import os
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-import chat.routing
-
+from chat.routing import websocket_urlpatterns as chat_ws
+from users.routing import websocket_urlpatterns as users_ws
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SocialNetwork.settings')
 
 application = ProtocolTypeRouter({
     'http': get_asgi_application(),
-    'websocket': URLRouter(chat.routing.websocket_urlpatterns)
+    'websocket': URLRouter(chat_ws + users_ws),
 })

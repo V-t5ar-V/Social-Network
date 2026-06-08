@@ -166,9 +166,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
 
     async def chat_message(self, event):
-        print(event)
         message = event['text']
-        print(message)
         await self.send(text_data=json.dumps(
             message
         , ensure_ascii=False, default=str))
