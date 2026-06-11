@@ -34,6 +34,8 @@ class Media(models.Model):
 
 class Tag(models.Model):
     tag = models.SlugField(max_length=20, unique=True)
+    def __str__(self):
+        return f"id: {self.id}, {self.tag}"
 
     def save(self, *args, **kwargs):
         self.tag = slugify(self.tag)
@@ -47,7 +49,7 @@ class Comment(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
 
 class Like(models.Model):
-    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='likes')
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:

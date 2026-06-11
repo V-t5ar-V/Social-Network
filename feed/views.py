@@ -6,8 +6,23 @@ from rest_framework.generics import get_object_or_404
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer, LikeSerializer
+from django.db.models import (
+    Count,
+    Case,
+    When,
+    IntegerField,
+)
+
+from .models import (
+    Post,
+    Comment
+)
+
+from .serializers import (
+    PostSerializer,
+    CommentSerializer,
+    LikeSerializer
+)
 
 
 class PostViewSet(viewsets.ViewSet):
@@ -19,14 +34,30 @@ class PostViewSet(viewsets.ViewSet):
     serializer_class = PostSerializer
     pagination_class = PageNumberPagination
     def list(self, request):
-        queryset = Post.objects.all().order_by('-created_at')
+        following_ids = request.user.following.filter(subscription_status='ACCEPTED').values_list('following__id', flat=True)
+
+        recent_liked_tags = request.user.likes.all().order_by('-created_at')[:30].values_list('post__tags', flat=True)
+
+        posts = Post.objects.annotate(
+            priority=Case(
+                When(user__id__in=following_ids, then=1),
+                default=0,
+                output_field=IntegerField()
+            ),
+        ).annotate(
+            potential=Case(
+                When(tags__in=recent_liked_tags, then=1),
+                default=0,
+                output_field=IntegerField()
+            )
+        ).order_by('-priority', '-potential', '-created_at').distinct()
         paginator = self.pagination_class()
-        page = paginator.paginate_queryset(queryset, request, view=self)
+        page = paginator.paginate_queryset(posts, request, view=self)
 
         if page is not None:
             serializer = PostSerializer(page, many=True, context={'request': request})
             return paginator.get_paginated_response(serializer.data)
-        serializer = PostSerializer(queryset, many=True, context={'request': request})
+        serializer = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
