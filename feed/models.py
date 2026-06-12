@@ -26,6 +26,9 @@ class Post(models.Model):
             self.slug = slugify(slug)
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.slug
+
 
 
 class Media(models.Model):
@@ -56,9 +59,6 @@ class Like(models.Model):
         unique_together = ('user', 'post')
 
 class Post_View(models.Model):
-    """
-    На данный момент модель не используется...
-    """
-    viewer = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    post = models.ForeignKey('Post', on_delete=models.CASCADE, default=None)
+    viewer = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='views')
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, default=None, related_name='views')
     created_at = models.DateTimeField(auto_now_add=True)

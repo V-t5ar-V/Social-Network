@@ -49,6 +49,7 @@ class PostSerializer(serializers.Serializer):
             'media': media_files,
             'likes': instance.likes.count(),
             'comments': instance.comments.count(),
+            'views': instance.views.count()
         }
         return data
 

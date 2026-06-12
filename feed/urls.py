@@ -9,7 +9,7 @@ urlpatterns = [
 
     path('posts/',PostViewSet.as_view({ # + +
         'post': 'create',
-        'get': 'list',
+        'get': 'get_post',
     }), name='posts'),
     path('posts/<slug:slug>/', PostViewSet.as_view({ # +
         'delete': 'destroy',
@@ -34,8 +34,11 @@ urlpatterns = [
     path('comments/<int:pk>/', CommentViewSet.as_view({
         "delete": "destroy",
     }), name='comments'),
-#     path('posts/<slug:slug>/views/', noview, name='number_of_views'),
     path('profiles/<slug:slug>/posts/', PostViewSet.as_view({
         'get': 'profile_posts_list'
     }), name='posts_list'),
+
+    path('history/', PostViewSet.as_view({
+        'get': 'viewed_posts',
+    }))
 ]

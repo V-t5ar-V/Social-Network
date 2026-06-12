@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 User = get_user_model()
 
 from django.db.models import (
@@ -11,11 +12,13 @@ from django.db.models import (
     Case,
     When,
     IntegerField,
+    BooleanField,
 )
 
 from .models import (
     Post,
-    Comment
+    Comment,
+    Post_View
 )
 
 from .serializers import (
@@ -33,33 +36,63 @@ class PostViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = PostSerializer
     pagination_class = PageNumberPagination
-    def list(self, request):
+    @action(methods=['get'], detail=False)
+    def get_post(self, request):
+
         following_ids = request.user.following.filter(subscription_status='ACCEPTED').values_list('following__id', flat=True)
 
         recent_liked_tags = request.user.likes.all().order_by('-created_at')[:30].values_list('post__tags', flat=True)
 
-        posts = Post.objects.annotate(
+        viewed_posts = request.user.views.all().values_list('post__id', flat=True)
+
+        post = Post.objects.annotate(
+            potential=Case(
+                When(tags__in=recent_liked_tags, then=1),
+                default=0,
+                output_field=IntegerField()
+            ),
+            is_watched=Case(
+                When(id__in=viewed_posts, then=0),
+                default=1,
+                output_field=IntegerField()
+            ),
             priority=Case(
                 When(user__id__in=following_ids, then=1),
                 default=0,
                 output_field=IntegerField()
             ),
-        ).annotate(
-            potential=Case(
-                When(tags__in=recent_liked_tags, then=1),
-                default=0,
-                output_field=IntegerField()
-            )
-        ).order_by('-priority', '-potential', '-created_at').distinct()
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(posts, request, view=self)
+        ).order_by('-is_watched','-priority', '-potential', '-created_at').distinct().first()
 
-        if page is not None:
-            serializer = PostSerializer(page, many=True, context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
-        serializer = PostSerializer(posts, many=True, context={'request': request})
+
+        serializer = PostSerializer(post, context={'request': request})
+
+
+        Post_View.objects.update_or_create(
+            viewer=request.user,
+            post=post,
+            defaults={'created_at':timezone.now()}
+        )
+
         return Response(serializer.data, status=status.HTTP_200_OK)
+        # paginator = self.pagination_class()
+        # page = paginator.paginate_queryset(posts, request, view=self)
 
+        # if page is not None:
+        #     serializer = PostSerializer(page, many=True, context={'request': request})
+        #     return paginator.get_paginated_response(serializer.data)
+        # serializer = PostSerializer(posts, many=True, context={'request': request})
+        # return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def viewed_posts(self, request):
+        user = request.user
+
+        viewed_posts = user.views.all().values_list('post__slug', flat=True).order_by('-created_at')
+
+        if viewed_posts:
+            return Response(viewed_posts, status=status.HTTP_200_OK)
+
+        return Response({'title': 'Вы еще не посмотрели ни одного поста'}, status=status.HTTP_200_OK)
 
     def create(self, request):
         user = request.user
