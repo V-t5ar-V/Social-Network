@@ -1,11 +1,11 @@
 # Social Network
-Социальная сеть с профилями, лентой новостей и поддержкой групповых чатов
-Построен на Django Rest Framework, Django Channels и Websockets
-Поддерживает JWT аутентификацию
+Социальная сеть с профилями, лентой новостей и поддержкой групповых чатов.
+Построен на Django Rest Framework, Django Channels и Websockets.
+Поддерживает JWT аутентификацию.
 
 ## Технологии
 - Python 3.14, Django 6.0.4, Django Channels, Django rest framework, DRF YASG, 
-- JWT аутентификация
+- JWT аутентификация.
 
 ## Установка
 ```
